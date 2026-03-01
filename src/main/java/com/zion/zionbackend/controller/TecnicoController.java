@@ -20,4 +20,14 @@ public class TecnicoController {
     public TecnicoDTO crear(@RequestBody @Valid TecnicoCreateDTO req) {
         return tecnicoService.crear(req);
     }
+
+    @GetMapping
+    public java.util.List<TecnicoDTO> listar() {
+        return tecnicoService.listar();
+    }
+
+    @GetMapping("/{id}")
+    public TecnicoDTO obtener(@PathVariable Long id) {
+        return tecnicoService.obtener(id);
+    }
 }

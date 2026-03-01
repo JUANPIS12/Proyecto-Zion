@@ -34,7 +34,7 @@ public class TecnicoService {
     @Transactional
     public TecnicoDTO crear(TecnicoCreateDTO req) {
 
-        // ✅ buscar sede
+        //  buscar sede
         Sede sede = sedeRepository.findById(req.sedeId())
                 .orElseThrow(() -> new RuntimeException("Sede no existe"));
 
@@ -45,7 +45,7 @@ public class TecnicoService {
         tecnico.setEmail(req.email());
         tecnico.setSede(sede);
 
-        // ✅ buscar tecnologias
+        //  buscar tecnologias
         if (req.tecnologiaIds() != null) {
             Set<Tecnologia> tecnologias =
                     req.tecnologiaIds().stream()
@@ -63,6 +63,33 @@ public class TecnicoService {
                 saved.getNombre(),
                 saved.getTecnologias()
                         .stream()
+                        .map(Tecnologia::getNombre)
+                        .collect(Collectors.toSet())
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<TecnicoDTO> listar() {
+        return tecnicoRepository.findAll().stream()
+                .map(t -> new TecnicoDTO(
+                        t.getId(),
+                        t.getNombre(),
+                        t.getTecnologias().stream()
+                                .map(Tecnologia::getNombre)
+                                .collect(Collectors.toSet())
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TecnicoDTO obtener(Long id) {
+        Tecnico t = tecnicoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Técnico no encontrado: " + id));
+
+        return new TecnicoDTO(
+                t.getId(),
+                t.getNombre(),
+                t.getTecnologias().stream()
                         .map(Tecnologia::getNombre)
                         .collect(Collectors.toSet())
         );
