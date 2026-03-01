@@ -5,10 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface TecnologiaRepository
-        extends JpaRepository<Tecnologia, Long> {
-
+public interface TecnologiaRepository extends JpaRepository<Tecnologia, Long> {
     Optional<Tecnologia> findByNombreIgnoreCase(String nombre);
-
     boolean existsByNombreIgnoreCase(String nombre);
 }
