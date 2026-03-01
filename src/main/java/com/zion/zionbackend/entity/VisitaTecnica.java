@@ -30,7 +30,7 @@ public class VisitaTecnica {
     @JoinColumn(name = "orden_servicio_id", nullable = false)
     private OrdenServicio ordenServicio;
 
-    // 🔹 muchas visitas las hace un técnico
+    //muchas visitas las hace un técnico
     @ManyToOne(optional = false)
     @JoinColumn(name = "tecnico_id", nullable = false)
     private Tecnico tecnico;

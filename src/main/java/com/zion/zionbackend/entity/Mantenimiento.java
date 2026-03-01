@@ -22,12 +22,12 @@ public class Mantenimiento {
     @Column(name = "fecha_fin", nullable = false)
     private LocalDateTime fechaFin;
 
-    // 🔹 pertenece a una orden
+    // pertenece a una orden
     @ManyToOne(optional = false)
     @JoinColumn(name = "orden_servicio_id", nullable = false)
     private OrdenServicio ordenServicio;
 
-    // 🔹 pertenece a un equipo
+    //pertenece a un equipo
     @ManyToOne(optional = false)
     @JoinColumn(name = "equipo_id", nullable = false)
     private Equipo equipo;

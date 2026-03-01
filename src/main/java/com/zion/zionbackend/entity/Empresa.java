@@ -24,7 +24,7 @@ public class Empresa {
     @JoinColumn(name = "sede_id", nullable = false)
     private Sede sede;
 
-    // ✅ Many-to-Many: Empresa <-> Tecnología
+    //Many-to-Many: Empresa <-> Tecnología
     @ManyToMany
     @JoinTable(
             name = "empresa_tecnologia",

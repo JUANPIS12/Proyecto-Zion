@@ -18,12 +18,12 @@ public class Tecnologia {
 
     private String descripcion;
 
-    // ✅ Relación inversa con Empresa (se ignora en JSON para evitar ciclos)
+    //Relación inversa con Empresa (se ignora en JSON para evitar ciclos)
     @JsonIgnore
     @ManyToMany(mappedBy = "tecnologias")
     private Set<Empresa> empresas = new HashSet<>();
 
-    // ✅ Relación inversa con Tecnico (se ignora en JSON para evitar ciclos)
+    //Relación inversa con Tecnico (se ignora en JSON para evitar ciclos)
     @JsonIgnore
     @ManyToMany(mappedBy = "tecnologias")
     private Set<Tecnico> tecnicos = new HashSet<>();
