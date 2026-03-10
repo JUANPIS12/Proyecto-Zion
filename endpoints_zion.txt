@@ -1,0 +1,207 @@
+LISTADO DE ENDPOINTS - API ZION (CRUD COMPLETO)
+==============================================
+
+--- EMPRESAS ---
+GET /api/empresas
+Listar todas las empresas.
+
+GET /api/empresas/{id}
+Obtener una empresa por ID.
+Params: id (Long)
+
+POST /api/empresas
+Crear una nueva empresa.
+JSON Body:
+{
+  "nombre": "Empresa Ejemplo",
+  "ciudad": "Ciudad",
+  "direccion": "Calle 123",
+  "contacto": "Juan Perez",
+  "estado": "ACTIVO",
+  "sedeId": 1,
+  "tecnologiaIds": [1, 2]
+}
+
+PUT /api/empresas/{id}
+Actualizar una empresa existente.
+Params: id (Long)
+JSON Body: (Mismo formato que POST)
+
+DELETE /api/empresas/{id}
+Eliminar una empresa.
+Params: id (Long)
+
+--- EQUIPOS ---
+GET /api/equipos
+Listar todos los equipos.
+
+GET /api/equipos/{id}
+Obtener un equipo por ID.
+Params: id (Long)
+
+POST /api/equipos
+Crear un nuevo equipo.
+JSON Body:
+{
+  "serial": "SN123456",
+  "referencia": "Ref-001",
+  "ciudadActual": "Ciudad",
+  "plantaActual": "Planta A",
+  "areaActual": "Produccion",
+  "lineaActual": "Linea 1",
+  "estado": "OPERATIVO",
+  "sedeId": 1,
+  "empresaId": 1,
+  "tecnologiaId": 1
+}
+
+PUT /api/equipos/{id}
+Actualizar un equipo existente.
+Params: id (Long)
+JSON Body: (Mismo formato que POST)
+
+DELETE /api/equipos/{id}
+Eliminar un equipo.
+Params: id (Long)
+
+--- MANTENIMIENTOS ---
+GET /api/mantenimientos
+Listar todos los mantenimientos.
+
+GET /api/mantenimientos/{id}
+Obtener un mantenimiento por ID.
+Params: id (Long)
+
+POST /api/mantenimientos
+Crear un nuevo mantenimiento.
+JSON Body:
+{
+  "tipo": "PREVENTIVO",
+  "descripcion": "Revision general trimestral",
+  "fechaInicio": "2024-03-20T08:00:00",
+  "fechaFin": "2024-03-20T12:00:00",
+  "ordenServicioId": 1,
+  "equipoId": 1
+}
+
+PUT /api/mantenimientos/{id}
+Actualizar un mantenimiento existente.
+Params: id (Long)
+JSON Body: (Mismo formato que POST)
+
+DELETE /api/mantenimientos/{id}
+Eliminar un mantenimiento.
+Params: id (Long)
+
+--- ORDENES DE SERVICIO ---
+GET /api/ordenes
+Listar todas las órdenes de servicio.
+
+GET /api/ordenes/{id}
+Obtener una orden de servicio por ID.
+Params: id (Long)
+
+POST /api/ordenes
+Crear una nueva orden de servicio.
+JSON Body:
+{
+  "numeroOrden": "OS-2024-001",
+  "fechaProgramada": "2024-03-25T09:00:00",
+  "estado": "PROGRAMADA",
+  "sedeId": 1,
+  "empresaId": 1,
+  "tecnicoId": 1
+}
+
+PUT /api/ordenes/{id}
+Actualizar una orden de servicio existente.
+Params: id (Long)
+JSON Body: (Mismo formato que POST)
+
+DELETE /api/ordenes/{id}
+Eliminar una orden de servicio.
+Params: id (Long)
+
+--- TECNICOS ---
+GET /api/tecnicos
+Listar todos los técnicos.
+
+GET /api/tecnicos/{id}
+Obtener un técnico por ID.
+Params: id (Long)
+
+POST /api/tecnicos
+Crear un nuevo técnico.
+JSON Body:
+{
+  "nombre": "Carlos Tecnico",
+  "documento": "12345678",
+  "telefono": "3001234567",
+  "email": "carlos@ejemplo.com",
+  "sedeId": 1,
+  "tecnologiaIds": [1, 2]
+}
+
+PUT /api/tecnicos/{id}
+Actualizar un técnico existente.
+Params: id (Long)
+JSON Body: (Mismo formato que POST)
+
+DELETE /api/tecnicos/{id}
+Eliminar un técnico.
+Params: id (Long)
+
+--- TECNOLOGIAS ---
+GET /api/tecnologias
+Listar todas las tecnologías.
+
+GET /api/tecnologias/{id}
+Obtener una tecnología por ID.
+Params: id (Long)
+
+POST /api/tecnologias
+Crear una nueva tecnología.
+JSON Body:
+{
+  "nombre": "Mecanica",
+  "descripcion": "Mantenimiento mecanico industrial"
+}
+
+PUT /api/tecnologias/{id}
+Actualizar una tecnología existente.
+Params: id (Long)
+JSON Body: (Mismo formato que POST)
+
+DELETE /api/tecnologias/{id}
+Eliminar una tecnología.
+Params: id (Long)
+
+--- VISITAS TECNICAS ---
+GET /api/visitas
+Listar todas las visitas técnicas.
+
+GET /api/visitas/{id}
+Obtener una visita técnica por ID.
+Params: id (Long)
+
+POST /api/visitas
+Crear una nueva visita técnica.
+JSON Body:
+{
+  "fechaInicio": "2024-03-20T14:00:00",
+  "fechaFin": "2024-03-20T17:00:00",
+  "observaciones": "Visita inicial de diagnostico",
+  "ubicacionInicio": "4.6097,-74.0817",
+  "ubicacionFin": "4.6100,-74.0820",
+  "ordenServicioId": 1,
+  "tecnicoId": 1
+}
+
+PUT /api/visitas/{id}
+Actualizar una visita técnica existente.
+Params: id (Long)
+JSON Body: (Mismo formato que POST)
+
+DELETE /api/visitas/{id}
+Eliminar una visita técnica.
+Params: id (Long)

@@ -16,64 +16,63 @@ import java.util.List;
 @Service
 public class MantenimientoService {
 
-    private final MantenimientoRepository mantenimientoRepository;
-    private final OrdenServicioRepository ordenServicioRepository;
-    private final EquipoRepository equipoRepository;
+        private final MantenimientoRepository mantenimientoRepository;
+        private final OrdenServicioRepository ordenServicioRepository;
+        private final EquipoRepository equipoRepository;
 
-    public MantenimientoService(MantenimientoRepository mantenimientoRepository,
-                                OrdenServicioRepository ordenServicioRepository,
-                                EquipoRepository equipoRepository) {
-        this.mantenimientoRepository = mantenimientoRepository;
-        this.ordenServicioRepository = ordenServicioRepository;
-        this.equipoRepository = equipoRepository;
-    }
-
-    @Transactional
-    public MantenimientoDTO crear(MantenimientoCreateDTO req) {
-
-        OrdenServicio orden = ordenServicioRepository.findById(req.ordenServicioId())
-                .orElseThrow(() -> new IllegalArgumentException("Orden no existe: " + req.ordenServicioId()));
-
-        Equipo equipo = equipoRepository.findById(req.equipoId())
-                .orElseThrow(() -> new IllegalArgumentException("Equipo no existe: " + req.equipoId()));
-
-        if (req.fechaFin().isBefore(req.fechaInicio())) {
-            throw new IllegalArgumentException("fechaFin no puede ser menor que fechaInicio");
+        public MantenimientoService(MantenimientoRepository mantenimientoRepository,
+                        OrdenServicioRepository ordenServicioRepository,
+                        EquipoRepository equipoRepository) {
+                this.mantenimientoRepository = mantenimientoRepository;
+                this.ordenServicioRepository = ordenServicioRepository;
+                this.equipoRepository = equipoRepository;
         }
 
-        Mantenimiento m = new Mantenimiento();
-        m.setTipo(req.tipo());
-        m.setDescripcion(req.descripcion());
-        m.setFechaInicio(req.fechaInicio());
-        m.setFechaFin(req.fechaFin());
-        m.setOrdenServicio(orden);
-        m.setEquipo(equipo);
+        @Transactional
+        public MantenimientoDTO crear(MantenimientoCreateDTO req) {
 
-        Mantenimiento saved = mantenimientoRepository.save(m);
+                OrdenServicio orden = ordenServicioRepository.findById(req.ordenServicioId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Orden no existe: " + req.ordenServicioId()));
 
-        return new MantenimientoDTO(
-                saved.getId(),
-                saved.getTipo(),
-                saved.getDescripcion(),
-                saved.getFechaInicio(),
-                saved.getFechaFin(),
-                saved.getOrdenServicio().getId(),
-                saved.getEquipo().getId()
-        );
-    }
+                Equipo equipo = equipoRepository.findById(req.equipoId())
+                                .orElseThrow(() -> new IllegalArgumentException("Equipo no existe: " + req.equipoId()));
 
-    @Transactional(readOnly = true)
-    public List<MantenimientoDTO> listar() {
-        return mantenimientoRepository.findAll().stream()
-                .map(m -> new MantenimientoDTO(
-                        m.getId(),
-                        m.getTipo(),
-                        m.getDescripcion(),
-                        m.getFechaInicio(),
-                        m.getFechaFin(),
-                        m.getOrdenServicio().getId(),
-                        m.getEquipo().getId()
-                ))
-                .toList();
-    }
+                if (req.fechaFin().isBefore(req.fechaInicio())) {
+                        throw new IllegalArgumentException("fechaFin no puede ser menor que fechaInicio");
+                }
+
+                Mantenimiento m = new Mantenimiento();
+                m.setTipo(req.tipo());
+                m.setDescripcion(req.descripcion());
+                m.setFechaInicio(req.fechaInicio());
+                m.setFechaFin(req.fechaFin());
+                m.setOrdenServicio(orden);
+                m.setEquipo(equipo);
+
+                Mantenimiento saved = mantenimientoRepository.save(m);
+
+                return new MantenimientoDTO(
+                                saved.getId(),
+                                saved.getTipo(),
+                                saved.getDescripcion(),
+                                saved.getFechaInicio(),
+                                saved.getFechaFin(),
+                                saved.getOrdenServicio().getId(),
+                                saved.getEquipo().getId());
+        }
+
+        @Transactional(readOnly = true)
+        public List<MantenimientoDTO> listar() {
+                return mantenimientoRepository.findAll().stream()
+                                .map(m -> new MantenimientoDTO(
+                                                m.getId(),
+                                                m.getTipo(),
+                                                m.getDescripcion(),
+                                                m.getFechaInicio(),
+                                                m.getFechaFin(),
+                                                m.getOrdenServicio().getId(),
+                                                m.getEquipo().getId()))
+                                .toList();
+        }
 }

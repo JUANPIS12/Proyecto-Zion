@@ -19,92 +19,91 @@ import java.util.List;
 @Service
 public class OrdenServicioService {
 
-    private final OrdenServicioRepository ordenServicioRepository;
-    private final SedeRepository sedeRepository;
-    private final EmpresaRepository empresaRepository;
-    private final TecnicoRepository tecnicoRepository;
+        private final OrdenServicioRepository ordenServicioRepository;
+        private final SedeRepository sedeRepository;
+        private final EmpresaRepository empresaRepository;
+        private final TecnicoRepository tecnicoRepository;
 
-    public OrdenServicioService(OrdenServicioRepository ordenServicioRepository,
-                                SedeRepository sedeRepository,
-                                EmpresaRepository empresaRepository,
-                                TecnicoRepository tecnicoRepository) {
-        this.ordenServicioRepository = ordenServicioRepository;
-        this.sedeRepository = sedeRepository;
-        this.empresaRepository = empresaRepository;
-        this.tecnicoRepository = tecnicoRepository;
-    }
-
-    @Transactional
-    public OrdenServicioDTO crear(OrdenServicioCreateDTO req) {
-        String numero = req.numeroOrden().trim();
-
-        if (ordenServicioRepository.existsByNumeroOrden(numero)) {
-            throw new IllegalArgumentException("Ya existe una orden con numeroOrden: " + numero);
+        public OrdenServicioService(OrdenServicioRepository ordenServicioRepository,
+                        SedeRepository sedeRepository,
+                        EmpresaRepository empresaRepository,
+                        TecnicoRepository tecnicoRepository) {
+                this.ordenServicioRepository = ordenServicioRepository;
+                this.sedeRepository = sedeRepository;
+                this.empresaRepository = empresaRepository;
+                this.tecnicoRepository = tecnicoRepository;
         }
 
-        Sede sede = sedeRepository.findById(req.sedeId())
-                .orElseThrow(() -> new IllegalArgumentException("Sede no existe: " + req.sedeId()));
+        @Transactional
+        public OrdenServicioDTO crear(OrdenServicioCreateDTO req) {
+                String numero = req.numeroOrden().trim();
 
-        Empresa empresa = empresaRepository.findById(req.empresaId())
-                .orElseThrow(() -> new IllegalArgumentException("Empresa no existe: " + req.empresaId()));
+                if (ordenServicioRepository.existsByNumeroOrden(numero)) {
+                        throw new IllegalArgumentException("Ya existe una orden con numeroOrden: " + numero);
+                }
 
-        Tecnico tecnico = tecnicoRepository.findById(req.tecnicoId())
-                .orElseThrow(() -> new IllegalArgumentException("Tecnico no existe: " + req.tecnicoId()));
+                Sede sede = sedeRepository.findById(req.sedeId())
+                                .orElseThrow(() -> new IllegalArgumentException("Sede no existe: " + req.sedeId()));
 
-        OrdenServicio os = new OrdenServicio();
-        os.setNumeroOrden(numero);
-        os.setFechaCreacion(LocalDateTime.now());
-        os.setFechaProgramada(req.fechaProgramada());
-        os.setEstado(req.estado());
+                Empresa empresa = empresaRepository.findById(req.empresaId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Empresa no existe: " + req.empresaId()));
 
-        os.setSede(sede);
-        os.setEmpresa(empresa);
-        os.setTecnicoAsignado(tecnico);
+                Tecnico tecnico = tecnicoRepository.findById(req.tecnicoId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Tecnico no existe: " + req.tecnicoId()));
 
-        OrdenServicio saved = ordenServicioRepository.save(os);
+                OrdenServicio os = new OrdenServicio();
+                os.setNumeroOrden(numero);
+                os.setFechaCreacion(LocalDateTime.now());
+                os.setFechaProgramada(req.fechaProgramada());
+                os.setEstado(req.estado());
 
-        return new OrdenServicioDTO(
-                saved.getId(),
-                saved.getNumeroOrden(),
-                saved.getFechaCreacion(),
-                saved.getFechaProgramada(),
-                saved.getEstado(),
-                saved.getSede().getId(),
-                saved.getEmpresa().getId(),
-                saved.getTecnicoAsignado().getId()
-        );
-    }
+                os.setSede(sede);
+                os.setEmpresa(empresa);
+                os.setTecnicoAsignado(tecnico);
 
-    @Transactional(readOnly = true)
-    public List<OrdenServicioDTO> listar() {
-        return ordenServicioRepository.findAll().stream()
-                .map(o -> new OrdenServicioDTO(
-                        o.getId(),
-                        o.getNumeroOrden(),
-                        o.getFechaCreacion(),
-                        o.getFechaProgramada(),
-                        o.getEstado(),
-                        o.getSede().getId(),
-                        o.getEmpresa().getId(),
-                        o.getTecnicoAsignado().getId()
-                ))
-                .toList();
-    }
+                OrdenServicio saved = ordenServicioRepository.save(os);
 
-    @Transactional(readOnly = true)
-    public OrdenServicioDTO obtener(Long id) {
-        OrdenServicio o = ordenServicioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada: " + id));
+                return new OrdenServicioDTO(
+                                saved.getId(),
+                                saved.getNumeroOrden(),
+                                saved.getFechaCreacion(),
+                                saved.getFechaProgramada(),
+                                saved.getEstado(),
+                                saved.getSede().getId(),
+                                saved.getEmpresa().getId(),
+                                saved.getTecnicoAsignado().getId());
+        }
 
-        return new OrdenServicioDTO(
-                o.getId(),
-                o.getNumeroOrden(),
-                o.getFechaCreacion(),
-                o.getFechaProgramada(),
-                o.getEstado(),
-                o.getSede().getId(),
-                o.getEmpresa().getId(),
-                o.getTecnicoAsignado().getId()
-        );
-    }
+        @Transactional(readOnly = true)
+        public List<OrdenServicioDTO> listar() {
+                return ordenServicioRepository.findAll().stream()
+                                .map(o -> new OrdenServicioDTO(
+                                                o.getId(),
+                                                o.getNumeroOrden(),
+                                                o.getFechaCreacion(),
+                                                o.getFechaProgramada(),
+                                                o.getEstado(),
+                                                o.getSede().getId(),
+                                                o.getEmpresa().getId(),
+                                                o.getTecnicoAsignado().getId()))
+                                .toList();
+        }
+
+        @Transactional(readOnly = true)
+        public OrdenServicioDTO obtener(Long id) {
+                OrdenServicio o = ordenServicioRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada: " + id));
+
+                return new OrdenServicioDTO(
+                                o.getId(),
+                                o.getNumeroOrden(),
+                                o.getFechaCreacion(),
+                                o.getFechaProgramada(),
+                                o.getEstado(),
+                                o.getSede().getId(),
+                                o.getEmpresa().getId(),
+                                o.getTecnicoAsignado().getId());
+        }
 }

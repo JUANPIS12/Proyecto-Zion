@@ -17,81 +17,78 @@ import java.util.stream.Collectors;
 @Service
 public class TecnicoService {
 
-    private final TecnicoRepository tecnicoRepository;
-    private final TecnologiaRepository tecnologiaRepository;
-    private final SedeRepository sedeRepository;
+        private final TecnicoRepository tecnicoRepository;
+        private final TecnologiaRepository tecnologiaRepository;
+        private final SedeRepository sedeRepository;
 
-    public TecnicoService(
-            TecnicoRepository tecnicoRepository,
-            TecnologiaRepository tecnologiaRepository,
-            SedeRepository sedeRepository) {
+        public TecnicoService(
+                        TecnicoRepository tecnicoRepository,
+                        TecnologiaRepository tecnologiaRepository,
+                        SedeRepository sedeRepository) {
 
-        this.tecnicoRepository = tecnicoRepository;
-        this.tecnologiaRepository = tecnologiaRepository;
-        this.sedeRepository = sedeRepository;
-    }
-
-    @Transactional
-    public TecnicoDTO crear(TecnicoCreateDTO req) {
-
-        //  buscar sede
-        Sede sede = sedeRepository.findById(req.sedeId())
-                .orElseThrow(() -> new RuntimeException("Sede no existe"));
-
-        Tecnico tecnico = new Tecnico();
-        tecnico.setNombre(req.nombre());
-        tecnico.setDocumento(req.documento());
-        tecnico.setTelefono(req.telefono());
-        tecnico.setEmail(req.email());
-        tecnico.setSede(sede);
-
-        //  buscar tecnologias
-        if (req.tecnologiaIds() != null) {
-            Set<Tecnologia> tecnologias =
-                    req.tecnologiaIds().stream()
-                            .map(id -> tecnologiaRepository.findById(id)
-                                    .orElseThrow(() -> new RuntimeException("Tecnologia no encontrada: " + id)))
-                            .collect(Collectors.toSet());
-
-            tecnico.setTecnologias(tecnologias);
+                this.tecnicoRepository = tecnicoRepository;
+                this.tecnologiaRepository = tecnologiaRepository;
+                this.sedeRepository = sedeRepository;
         }
 
-        Tecnico saved = tecnicoRepository.save(tecnico);
+        @Transactional
+        public TecnicoDTO crear(TecnicoCreateDTO req) {
 
-        return new TecnicoDTO(
-                saved.getId(),
-                saved.getNombre(),
-                saved.getTecnologias()
-                        .stream()
-                        .map(Tecnologia::getNombre)
-                        .collect(Collectors.toSet())
-        );
-    }
+                // buscar sede
+                Sede sede = sedeRepository.findById(req.sedeId())
+                                .orElseThrow(() -> new RuntimeException("Sede no existe"));
 
-    @Transactional(readOnly = true)
-    public java.util.List<TecnicoDTO> listar() {
-        return tecnicoRepository.findAll().stream()
-                .map(t -> new TecnicoDTO(
-                        t.getId(),
-                        t.getNombre(),
-                        t.getTecnologias().stream()
-                                .map(Tecnologia::getNombre)
-                                .collect(Collectors.toSet())
-                ))
-                .toList();
-    }
+                Tecnico tecnico = new Tecnico();
+                tecnico.setNombre(req.nombre());
+                tecnico.setDocumento(req.documento());
+                tecnico.setTelefono(req.telefono());
+                tecnico.setEmail(req.email());
+                tecnico.setSede(sede);
 
-    @Transactional(readOnly = true)
-    public TecnicoDTO obtener(Long id) {
-        Tecnico t = tecnicoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Técnico no encontrado: " + id));
+                // buscar tecnologias
+                if (req.tecnologiaIds() != null) {
+                        Set<Tecnologia> tecnologias = req.tecnologiaIds().stream()
+                                        .map(id -> tecnologiaRepository.findById(id)
+                                                        .orElseThrow(() -> new RuntimeException(
+                                                                        "Tecnologia no encontrada: " + id)))
+                                        .collect(Collectors.toSet());
 
-        return new TecnicoDTO(
-                t.getId(),
-                t.getNombre(),
-                t.getTecnologias().stream()
-                        .map(Tecnologia::getNombre)
-                        .collect(Collectors.toSet())
-        );
-    }
+                        tecnico.setTecnologias(tecnologias);
+                }
+
+                Tecnico saved = tecnicoRepository.save(tecnico);
+
+                return new TecnicoDTO(
+                                saved.getId(),
+                                saved.getNombre(),
+                                saved.getTecnologias()
+                                                .stream()
+                                                .map(Tecnologia::getNombre)
+                                                .collect(Collectors.toSet()));
+        }
+
+        @Transactional(readOnly = true)
+        public java.util.List<TecnicoDTO> listar() {
+                return tecnicoRepository.findAll().stream()
+                                .map(t -> new TecnicoDTO(
+                                                t.getId(),
+                                                t.getNombre(),
+                                                t.getTecnologias().stream()
+                                                                .map(Tecnologia::getNombre)
+                                                                .collect(Collectors.toSet())))
+                                .toList();
+        }
+
+        @Transactional(readOnly = true)
+        public TecnicoDTO obtener(Long id) {
+                Tecnico t = tecnicoRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Técnico no encontrado: " + id));
+
+                return new TecnicoDTO(
+                                t.getId(),
+                                t.getNombre(),
+                                t.getTecnologias().stream()
+                                                .map(Tecnologia::getNombre)
+                                                .collect(Collectors.toSet()));
+        }
 }
