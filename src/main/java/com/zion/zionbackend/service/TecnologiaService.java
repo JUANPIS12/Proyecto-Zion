@@ -53,4 +53,30 @@ public class TecnologiaService {
 
         return new TecnologiaDTO(t.getId(), t.getNombre(), t.getDescripcion());
     }
+
+    @Transactional
+    public TecnologiaDTO actualizar(Long id, TecnologiaCreateDTO req) {
+        Tecnologia t = tecnologiaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tecnología no encontrada con id: " + id));
+
+        String nuevoNombre = req.nombre().trim();
+        if (!t.getNombre().equalsIgnoreCase(nuevoNombre)
+                && tecnologiaRepository.existsByNombreIgnoreCase(nuevoNombre)) {
+            throw new IllegalArgumentException("Ya existe otra tecnología con el nombre: " + nuevoNombre);
+        }
+
+        t.setNombre(nuevoNombre);
+        t.setDescripcion(req.descripcion());
+
+        Tecnologia saved = tecnologiaRepository.save(t);
+        return new TecnologiaDTO(saved.getId(), saved.getNombre(), saved.getDescripcion());
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        if (!tecnologiaRepository.existsById(id)) {
+            throw new IllegalArgumentException("Tecnología no encontrada con id: " + id);
+        }
+        tecnologiaRepository.deleteById(id);
+    }
 }

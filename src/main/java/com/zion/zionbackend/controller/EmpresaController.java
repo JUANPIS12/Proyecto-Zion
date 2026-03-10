@@ -32,4 +32,14 @@ public class EmpresaController {
     public EmpresaDTO obtener(@PathVariable Long id) {
         return empresaService.obtener(id);
     }
+
+    @PutMapping("/{id}")
+    public EmpresaDTO actualizar(@PathVariable Long id, @RequestBody @Valid EmpresaCreateDTO req) {
+        return empresaService.actualizar(id, req);
+    }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable Long id) {
+        empresaService.eliminar(id);
+    }
 }

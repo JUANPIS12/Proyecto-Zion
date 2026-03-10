@@ -85,4 +85,45 @@ public class EmpresaService {
                                 e.getSede().getId(),
                                 e.getTecnologias().stream().map(Tecnologia::getNombre).collect(Collectors.toSet()));
         }
+
+        @Transactional
+        public EmpresaDTO actualizar(Long id, EmpresaCreateDTO req) {
+                Empresa e = empresaRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Empresa no encontrada: " + id));
+
+                Sede sede = sedeRepository.findById(req.sedeId())
+                                .orElseThrow(() -> new IllegalArgumentException("Sede no existe: " + req.sedeId()));
+
+                e.setNombre(req.nombre());
+                e.setCiudad(req.ciudad());
+                e.setDireccion(req.direccion());
+                e.setContacto(req.contacto());
+                e.setEstado(req.estado());
+                e.setSede(sede);
+
+                Set<Long> ids = req.tecnologiaIds() == null ? Collections.emptySet() : req.tecnologiaIds();
+                Set<Tecnologia> tecnologias = ids.stream()
+                                .map(tid -> tecnologiaRepository.findById(tid)
+                                                .orElseThrow(() -> new IllegalArgumentException(
+                                                                "Tecnologia no existe: " + tid)))
+                                .collect(Collectors.toSet());
+
+                e.setTecnologias(tecnologias);
+
+                Empresa saved = empresaRepository.save(e);
+
+                return new EmpresaDTO(
+                                saved.getId(),
+                                saved.getNombre(),
+                                saved.getSede().getId(),
+                                saved.getTecnologias().stream().map(Tecnologia::getNombre).collect(Collectors.toSet()));
+        }
+
+        @Transactional
+        public void eliminar(Long id) {
+                if (!empresaRepository.existsById(id)) {
+                        throw new IllegalArgumentException("Empresa no encontrada: " + id);
+                }
+                empresaRepository.deleteById(id);
+        }
 }
