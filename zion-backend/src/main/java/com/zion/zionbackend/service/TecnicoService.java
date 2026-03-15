@@ -10,6 +10,7 @@ import com.zion.zionbackend.repository.TecnicoRepository;
 import com.zion.zionbackend.repository.TecnologiaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.zion.zionbackend.dto.TecnicoUpdateDTO;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -67,6 +68,77 @@ public class TecnicoService {
                                                 .collect(Collectors.toSet()));
         }
 
+        @Transactional
+        public TecnicoDTO actualizar(Long id, TecnicoUpdateDTO req) {
+                Tecnico tecnico = tecnicoRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Técnico no encontrado: " + id));
+
+                if (req.nombre() != null && !req.nombre().trim().isEmpty()) {
+                        tecnico.setNombre(req.nombre().trim());
+                }
+
+                if (req.documento() != null) {
+                        tecnico.setDocumento(req.documento());
+                }
+
+                if (req.telefono() != null) {
+                        tecnico.setTelefono(req.telefono());
+                }
+
+                if (req.email() != null) {
+                        tecnico.setEmail(req.email());
+                }
+
+                if (req.especialidad() != null) {
+                        tecnico.setEspecialidad(req.especialidad());
+                }
+
+                if (req.rol() != null) {
+                        tecnico.setRol(req.rol());
+                }
+
+                if (req.estado() != null) {
+                        tecnico.setEstado(req.estado());
+                }
+
+                if (req.sedeId() != null) {
+                        Sede sede = sedeRepository.findById(req.sedeId())
+                                .orElseThrow(() -> new IllegalArgumentException("Sede no existe: " + req.sedeId()));
+                        tecnico.setSede(sede);
+                }
+
+                if (req.tecnologiaIds() != null) {
+                        Set<Tecnologia> tecnologias = req.tecnologiaIds().stream()
+                                .map(tecnologiaId -> tecnologiaRepository.findById(tecnologiaId)
+                                        .orElseThrow(() -> new IllegalArgumentException("Tecnología no existe: " + tecnologiaId)))
+                                .collect(Collectors.toSet());
+
+                        tecnico.setTecnologias(tecnologias);
+                }
+
+                Tecnico saved = tecnicoRepository.save(tecnico);
+
+                return new TecnicoDTO(
+                        saved.getId(),
+                        saved.getNombre(),
+                        saved.getTecnologias().stream()
+                                .map(Tecnologia::getNombre)
+                                .collect(Collectors.toSet())
+                );
+        }
+
+        @Transactional
+        public void eliminar(Long id) {
+                Tecnico tecnico = tecnicoRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Técnico no encontrado: " + id));
+
+                tecnicoRepository.delete(tecnico);
+        }
+
+
+
+
+
         @Transactional(readOnly = true)
         public java.util.List<TecnicoDTO> listar() {
                 return tecnicoRepository.findAll().stream()
@@ -91,4 +163,6 @@ public class TecnicoService {
                                                 .map(Tecnologia::getNombre)
                                                 .collect(Collectors.toSet()));
         }
+
+
 }

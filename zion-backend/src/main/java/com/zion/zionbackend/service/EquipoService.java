@@ -12,6 +12,7 @@ import com.zion.zionbackend.repository.SedeRepository;
 import com.zion.zionbackend.repository.TecnologiaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.zion.zionbackend.dto.EquipoUpdateDTO;
 
 import java.util.List;
 
@@ -104,5 +105,84 @@ public class EquipoService {
                                 e.getEmpresa().getId(),
                                 e.getTecnologia().getId(),
                                 e.getEstado());
+        }
+
+
+        @Transactional
+        public EquipoDTO actualizar(Long id, EquipoUpdateDTO req) {
+                Equipo equipo = equipoRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Equipo no encontrado: " + id));
+
+                if (req.serial() != null && !req.serial().trim().isEmpty()) {
+                        String nuevoSerial = req.serial().trim();
+
+                        if (!nuevoSerial.equals(equipo.getSerial()) && equipoRepository.existsBySerial(nuevoSerial)) {
+                                throw new IllegalArgumentException("Ya existe un equipo con serial: " + nuevoSerial);
+                        }
+
+                        equipo.setSerial(nuevoSerial);
+                }
+
+                if (req.referencia() != null) {
+                        equipo.setReferencia(req.referencia());
+                }
+
+                if (req.ciudadActual() != null) {
+                        equipo.setCiudadActual(req.ciudadActual());
+                }
+
+                if (req.plantaActual() != null) {
+                        equipo.setPlantaActual(req.plantaActual());
+                }
+
+                if (req.areaActual() != null) {
+                        equipo.setAreaActual(req.areaActual());
+                }
+
+                if (req.lineaActual() != null) {
+                        equipo.setLineaActual(req.lineaActual());
+                }
+
+                if (req.estado() != null) {
+                        equipo.setEstado(req.estado());
+                }
+
+                if (req.sedeId() != null) {
+                        Sede sede = sedeRepository.findById(req.sedeId())
+                                .orElseThrow(() -> new IllegalArgumentException("Sede no existe: " + req.sedeId()));
+                        equipo.setSede(sede);
+                }
+
+                if (req.empresaId() != null) {
+                        Empresa empresa = empresaRepository.findById(req.empresaId())
+                                .orElseThrow(() -> new IllegalArgumentException("Empresa no existe: " + req.empresaId()));
+                        equipo.setEmpresa(empresa);
+                }
+
+                if (req.tecnologiaId() != null) {
+                        Tecnologia tecnologia = tecnologiaRepository.findById(req.tecnologiaId())
+                                .orElseThrow(() -> new IllegalArgumentException("Tecnologia no existe: " + req.tecnologiaId()));
+                        equipo.setTecnologia(tecnologia);
+                }
+
+                Equipo saved = equipoRepository.save(equipo);
+
+                return new EquipoDTO(
+                        saved.getId(),
+                        saved.getSerial(),
+                        saved.getReferencia(),
+                        saved.getSede().getId(),
+                        saved.getEmpresa().getId(),
+                        saved.getTecnologia().getId(),
+                        saved.getEstado()
+                );
+        }
+
+        @Transactional
+        public void eliminar(Long id) {
+                Equipo equipo = equipoRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Equipo no encontrado: " + id));
+
+                equipoRepository.delete(equipo);
         }
 }

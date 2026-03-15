@@ -1,11 +1,8 @@
 package com.zion.zionbackend.service;
 
-//valida reglas (no duplicados)
-//controla transacciones
-// transforma Entity → DTO
-
 import com.zion.zionbackend.dto.TecnologiaCreateDTO;
 import com.zion.zionbackend.dto.TecnologiaDTO;
+import com.zion.zionbackend.dto.TecnologiaUpdateDTO;
 import com.zion.zionbackend.entity.Tecnologia;
 import com.zion.zionbackend.repository.TecnologiaRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +24,7 @@ public class TecnologiaService {
         String nombre = req.nombre().trim();
 
         if (tecnologiaRepository.existsByNombreIgnoreCase(nombre)) {
-            throw new IllegalArgumentException("Ya existe una tecnología con el nombre: " + nombre);
+            throw new IllegalArgumentException("Ya existe una tecnología con ese nombre: " + nombre);
         }
 
         Tecnologia t = new Tecnologia();
@@ -55,18 +52,24 @@ public class TecnologiaService {
     }
 
     @Transactional
-    public TecnologiaDTO actualizar(Long id, TecnologiaCreateDTO req) {
+    public TecnologiaDTO actualizar(Long id, TecnologiaUpdateDTO req) {
         Tecnologia t = tecnologiaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Tecnología no encontrada con id: " + id));
 
-        String nuevoNombre = req.nombre().trim();
-        if (!t.getNombre().equalsIgnoreCase(nuevoNombre)
-                && tecnologiaRepository.existsByNombreIgnoreCase(nuevoNombre)) {
-            throw new IllegalArgumentException("Ya existe otra tecnología con el nombre: " + nuevoNombre);
+        if (req.nombre() != null && !req.nombre().trim().isEmpty()) {
+            String nuevoNombre = req.nombre().trim();
+
+            if (!nuevoNombre.equalsIgnoreCase(t.getNombre())
+                    && tecnologiaRepository.existsByNombreIgnoreCase(nuevoNombre)) {
+                throw new IllegalArgumentException("Ya existe una tecnología con ese nombre: " + nuevoNombre);
+            }
+
+            t.setNombre(nuevoNombre);
         }
 
-        t.setNombre(nuevoNombre);
-        t.setDescripcion(req.descripcion());
+        if (req.descripcion() != null) {
+            t.setDescripcion(req.descripcion());
+        }
 
         Tecnologia saved = tecnologiaRepository.save(t);
         return new TecnologiaDTO(saved.getId(), saved.getNombre(), saved.getDescripcion());
@@ -74,9 +77,9 @@ public class TecnologiaService {
 
     @Transactional
     public void eliminar(Long id) {
-        if (!tecnologiaRepository.existsById(id)) {
-            throw new IllegalArgumentException("Tecnología no encontrada con id: " + id);
-        }
-        tecnologiaRepository.deleteById(id);
+        Tecnologia t = tecnologiaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tecnología no encontrada con id: " + id));
+
+        tecnologiaRepository.delete(t);
     }
 }

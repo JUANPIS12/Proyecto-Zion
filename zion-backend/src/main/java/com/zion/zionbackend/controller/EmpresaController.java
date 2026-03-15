@@ -5,7 +5,7 @@ import com.zion.zionbackend.dto.EmpresaDTO;
 import com.zion.zionbackend.service.EmpresaService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
+import com.zion.zionbackend.dto.EmpresaUpdateDTO;
 import java.util.List;
 
 @RestController
@@ -33,8 +33,9 @@ public class EmpresaController {
         return empresaService.obtener(id);
     }
 
-    @PutMapping("/{id}")
-    public EmpresaDTO actualizar(@PathVariable Long id, @RequestBody @Valid EmpresaCreateDTO req) {
+
+    @PatchMapping("/{id}")
+    public EmpresaDTO actualizar(@PathVariable Long id, @RequestBody EmpresaUpdateDTO req) {
         return empresaService.actualizar(id, req);
     }
 

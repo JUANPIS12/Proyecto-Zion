@@ -2,6 +2,7 @@ package com.zion.zionbackend.controller;
 
 import com.zion.zionbackend.dto.TecnologiaCreateDTO;
 import com.zion.zionbackend.dto.TecnologiaDTO;
+import com.zion.zionbackend.dto.TecnologiaUpdateDTO;
 import com.zion.zionbackend.service.TecnologiaService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -31,5 +32,15 @@ public class TecnologiaController {
     @GetMapping("/{id}")
     public TecnologiaDTO obtener(@PathVariable Long id) {
         return tecnologiaService.obtenerPorId(id);
+    }
+
+    @PatchMapping("/{id}")
+    public TecnologiaDTO actualizar(@PathVariable Long id, @RequestBody @Valid TecnologiaUpdateDTO req) {
+        return tecnologiaService.actualizar(id, req);
+    }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable Long id) {
+        tecnologiaService.eliminar(id);
     }
 }
