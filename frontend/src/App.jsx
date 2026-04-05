@@ -8,7 +8,7 @@ export default function App() {
   const [rolUsuario, setRolUsuario] = useState(localStorage.getItem('rol') || '');
   const [puedeCrearAdmin, setPuedeCrearAdmin] = useState(localStorage.getItem('puedeCrearAdmin') === 'true');
   const [activeSection, setActiveSection] = useState('Dashboard');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const [mostrarFormularioTecnico, setMostrarFormularioTecnico] = useState(false);
@@ -885,7 +885,7 @@ export default function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
+    if (!username.trim() || !password.trim()) return;
     
     try {
       setLoading(true);
@@ -894,7 +894,7 @@ export default function App() {
       const res = await fetch('http://localhost:8080/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: email, password })
+        body: JSON.stringify({ username, password })
       });
       
       if (!res.ok) {
@@ -925,7 +925,7 @@ export default function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('rol');
     localStorage.removeItem('puedeCrearAdmin');
-    setEmail('');
+    setUsername('');
     setPassword('');
     setActiveSection('Dashboard');
     limpiarMensajes();
@@ -959,12 +959,12 @@ export default function App() {
 
                 <div className="mt-6 space-y-4">
                   <div>
-                    <label className="mb-2 block text-sm text-slate-200">Correo</label>
+                    <label className="mb-2 block text-sm text-slate-200">Usuario</label>
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="admin@zion.com"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Ej: admin"
                       className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-slate-400"
                     />
                   </div>
