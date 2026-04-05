@@ -23,8 +23,6 @@ import com.zion.zionbackend.repository.VisitaTecnicaRepository;
 import com.zion.zionbackend.entity.Tecnologia;
 
 
-
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,8 +35,6 @@ public class OrdenServicioService {
         private final TecnicoRepository tecnicoRepository;
         private final MantenimientoRepository mantenimientoRepository;
         private final VisitaTecnicaRepository visitaTecnicaRepository;
-
-
 
         public OrdenServicioService(OrdenServicioRepository ordenServicioRepository,
                                     SedeRepository sedeRepository,
@@ -199,15 +195,7 @@ public class OrdenServicioService {
 
                 List<MantenimientoDTO> mantenimientos = mantenimientoRepository.findByOrdenServicioId(id)
                         .stream()
-                        .map(m -> new MantenimientoDTO(
-                                m.getId(),
-                                m.getTipo(),
-                                m.getDescripcion(),
-                                m.getFechaInicio(),
-                                m.getFechaFin(),
-                                m.getOrdenServicio().getId(),
-                                m.getEquipo().getId()
-                        ))
+                        .map(this::mapMantenimientoToDTO)
                         .toList();
 
                 List<VisitaTecnicaDTO> visitas = visitaTecnicaRepository.findByOrdenServicioId(id)
@@ -244,6 +232,24 @@ public class OrdenServicioService {
 
                         mantenimientos,
                         visitas
+                );
+        }
+
+        private MantenimientoDTO mapMantenimientoToDTO(Mantenimiento m) {
+                return new MantenimientoDTO(
+                        m.getId(),
+                        m.getTipo(),
+                        m.getCondicionInicial(),
+                        m.getTecnologiaAsociada(),
+                        m.getTipoContrato(),
+                        m.getNovedades(),
+                        m.getEstadoFinal(),
+                        m.getEvidencias(),
+                        m.getDescripcion(),
+                        m.getFechaInicio(),
+                        m.getFechaFin(),
+                        m.getOrdenServicio().getId(),
+                        m.getEquipo().getId()
                 );
         }
 }
