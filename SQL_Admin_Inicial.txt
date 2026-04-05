@@ -1,0 +1,15 @@
+-- 1. Primero habilitamos la extensión de encriptación nativa en Postgres (si no la tienes activada en NeonDB)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- 2. Insertamos el primer usuario Super-Admin. 
+-- Fíjate que usamos crypt() y gen_salt() para que Postgres encripte 'admin123' en BCrypt,
+-- ya que Spring Security espera la contraseña encriptada de esa forma estricta.
+
+INSERT INTO usuario (username, password, rol, activo, puede_crear_admin)
+VALUES (
+    'admin', 
+    crypt('admin123', gen_salt('bf')), 
+    'ROLE_ADMIN', 
+    true, 
+    true
+);
