@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -36,22 +36,22 @@ export default function App() {
   const [mostrarModalDetalleOrden, setMostrarModalDetalleOrden] = useState(false);
 
   const [searchBySection, setSearchBySection] = useState({
-    'Órdenes de servicio': '',
-    'Visitas técnicas': '',
+    '├ôrdenes de servicio': '',
+    'Visitas t├®cnicas': '',
     Mantenimientos: '',
     Equipos: '',
     Clientes: '',
-    Técnicos: '',
+    T├®cnicos: '',
     Reportes: '',
   });
 
   const [filterBySection, setFilterBySection] = useState({
-    'Órdenes de servicio': 'TODOS',
-    'Visitas técnicas': 'TODOS',
+    '├ôrdenes de servicio': 'TODOS',
+    'Visitas t├®cnicas': 'TODOS',
     Mantenimientos: 'TODOS',
     Equipos: 'TODOS',
     Clientes: 'TODOS',
-    Técnicos: 'TODOS',
+    T├®cnicos: 'TODOS',
     Reportes: 'TODOS',
   });
 
@@ -117,12 +117,12 @@ export default function App() {
 
   const menu = [
     'Dashboard',
-    'Órdenes de servicio',
-    'Visitas técnicas',
+    '├ôrdenes de servicio',
+    'Visitas t├®cnicas',
     'Mantenimientos',
     'Equipos',
     'Clientes',
-    'Técnicos',
+    'T├®cnicos',
     'Reportes',
   ];
 
@@ -142,7 +142,7 @@ export default function App() {
     });
     if (res.status === 401 || res.status === 403) {
       handleLogout();
-      throw new Error("Sesión expirada o sin permisos");
+      throw new Error("Sesi├│n expirada o sin permisos");
     }
     if (!res.ok) throw new Error(`Error al consultar ${url}`);
     return res.json();
@@ -305,7 +305,7 @@ export default function App() {
 
       await postJson(`${API_URL}/tecnicos`, payload);
 
-      setSuccess('Técnico creado correctamente.');
+      setSuccess('T├®cnico creado correctamente.');
       setNuevoTecnico({
         nombre: '',
         documento: '',
@@ -317,7 +317,7 @@ export default function App() {
       setMostrarFormularioTecnico(false);
       await cargarDatos();
     } catch (err) {
-      setError(err.message || 'No se pudo crear el técnico');
+      setError(err.message || 'No se pudo crear el t├®cnico');
     }
   }
 
@@ -448,7 +448,7 @@ export default function App() {
 
       await postJson(`${API_URL}/visitas`, payload);
 
-      setSuccess('Visita técnica creada correctamente.');
+      setSuccess('Visita t├®cnica creada correctamente.');
       setNuevaVisita({
         fechaInicio: '',
         fechaFin: '',
@@ -502,7 +502,7 @@ export default function App() {
     limpiarMensajes();
 
     if (!navigator.geolocation) {
-      setError('Tu navegador no soporta geolocalización.');
+      setError('Tu navegador no soporta geolocalizaci├│n.');
       return;
     }
 
@@ -510,17 +510,17 @@ export default function App() {
       (position) => {
         const coords = `${position.coords.latitude},${position.coords.longitude}`;
         setNuevaVisita((prev) => ({ ...prev, ubicacionInicio: coords }));
-        setSuccess(`Ubicación de inicio capturada: ${coords}`);
+        setSuccess(`Ubicaci├│n de inicio capturada: ${coords}`);
       },
       (err) => {
         if (err.code === 1) {
-          setError('Permiso de ubicación denegado. Debes permitir acceso en el navegador.');
+          setError('Permiso de ubicaci├│n denegado. Debes permitir acceso en el navegador.');
         } else if (err.code === 2) {
-          setError('No se pudo obtener la ubicación. Revisa que el equipo tenga ubicación activa.');
+          setError('No se pudo obtener la ubicaci├│n. Revisa que el equipo tenga ubicaci├│n activa.');
         } else if (err.code === 3) {
-          setError('Se agotó el tiempo para obtener la ubicación.');
+          setError('Se agot├│ el tiempo para obtener la ubicaci├│n.');
         } else {
-          setError('Error desconocido al obtener la ubicación de inicio.');
+          setError('Error desconocido al obtener la ubicaci├│n de inicio.');
         }
       },
       {
@@ -535,7 +535,7 @@ export default function App() {
     limpiarMensajes();
 
     if (!navigator.geolocation) {
-      setError('Tu navegador no soporta geolocalización.');
+      setError('Tu navegador no soporta geolocalizaci├│n.');
       return;
     }
 
@@ -543,17 +543,17 @@ export default function App() {
       (position) => {
         const coords = `${position.coords.latitude},${position.coords.longitude}`;
         setNuevaVisita((prev) => ({ ...prev, ubicacionFin: coords }));
-        setSuccess(`Ubicación final capturada: ${coords}`);
+        setSuccess(`Ubicaci├│n final capturada: ${coords}`);
       },
       (err) => {
         if (err.code === 1) {
-          setError('Permiso de ubicación denegado. Debes permitir acceso en el navegador.');
+          setError('Permiso de ubicaci├│n denegado. Debes permitir acceso en el navegador.');
         } else if (err.code === 2) {
-          setError('No se pudo obtener la ubicación. Revisa que el equipo tenga ubicación activa.');
+          setError('No se pudo obtener la ubicaci├│n. Revisa que el equipo tenga ubicaci├│n activa.');
         } else if (err.code === 3) {
-          setError('Se agotó el tiempo para obtener la ubicación.');
+          setError('Se agot├│ el tiempo para obtener la ubicaci├│n.');
         } else {
-          setError('Error desconocido al obtener la ubicación final.');
+          setError('Error desconocido al obtener la ubicaci├│n final.');
         }
       },
       {
@@ -620,9 +620,9 @@ export default function App() {
     const ordenesFinalizadas = ordenes.filter((o) => o.estado === 'FINALIZADA').length;
 
     return [
-      { title: 'Órdenes abiertas', value: String(ordenesAbiertas) },
-      { title: 'Órdenes finalizadas', value: String(ordenesFinalizadas) },
-      { title: 'Técnicos activos', value: String(tecnicos.length) },
+      { title: '├ôrdenes abiertas', value: String(ordenesAbiertas) },
+      { title: '├ôrdenes finalizadas', value: String(ordenesFinalizadas) },
+      { title: 'T├®cnicos activos', value: String(tecnicos.length) },
       { title: 'Visitas registradas', value: String(visitas.length) },
       { title: 'Mantenimientos', value: String(mantenimientos.length) },
       { title: 'Equipos registrados', value: String(equipos.length) },
@@ -635,7 +635,7 @@ export default function App() {
       codigo: orden.numeroOrden || `Orden #${orden.id}`,
       cliente: empresasMap[orden.empresaId] || `Empresa #${orden.empresaId ?? ''}`,
       estado: orden.estado,
-      tecnico: tecnicosMap[orden.tecnicoId] || `Técnico #${orden.tecnicoId ?? ''}`,
+      tecnico: tecnicosMap[orden.tecnicoId] || `T├®cnico #${orden.tecnicoId ?? ''}`,
     }));
   }, [ordenes, empresasMap, tecnicosMap]);
 
@@ -647,7 +647,7 @@ export default function App() {
         fecha: formatearFecha(orden.fechaProgramada),
         estado: orden.estado,
         empresa: empresasMap[orden.empresaId] || orden.empresaId || 'Sin empresa',
-        tecnico: tecnicosMap[orden.tecnicoId] || orden.tecnicoId || 'Sin técnico',
+        tecnico: tecnicosMap[orden.tecnicoId] || orden.tecnicoId || 'Sin t├®cnico',
       })),
     [ordenes, empresasMap, tecnicosMap]
   );
@@ -671,7 +671,7 @@ export default function App() {
       mantenimientos.map((m) => ({
         id: m.id,
         tipo: m.tipo,
-        descripcion: m.descripcion || 'Sin descripción',
+        descripcion: m.descripcion || 'Sin descripci├│n',
         fechaInicio: formatearFecha(m.fechaInicio),
         fechaFin: formatearFecha(m.fechaFin),
         orden: ordenesMap[m.ordenServicioId] || m.ordenServicioId,
@@ -687,7 +687,7 @@ export default function App() {
         serial: equipo.serial,
         referencia: equipo.referencia || 'Sin referencia',
         empresa: empresasMap[equipo.empresaId] || equipo.empresaId || 'Sin empresa',
-        tecnologia: tecnologiasMap[equipo.tecnologiaId] || equipo.tecnologiaId || 'Sin tecnología',
+        tecnologia: tecnologiasMap[equipo.tecnologiaId] || equipo.tecnologiaId || 'Sin tecnolog├¡a',
         estado: equipo.estado || 'Sin estado',
       })),
     [equipos, empresasMap, tecnologiasMap]
@@ -699,7 +699,7 @@ export default function App() {
         id: empresa.id,
         nombre: empresa.nombre,
         sede: sedesMap[empresa.sedeId] || empresa.sedeId || 'Sin sede',
-        tecnologias: empresa.tecnologias?.join(', ') || 'Sin tecnologías',
+        tecnologias: empresa.tecnologias?.join(', ') || 'Sin tecnolog├¡as',
       })),
     [empresas, sedesMap]
   );
@@ -710,17 +710,17 @@ export default function App() {
         id: tecnico.id,
         nombre: tecnico.nombre,
         sede: sedesMap[tecnico.sedeId] || tecnico.sedeId || 'Sin sede',
-        tecnologias: tecnico.tecnologias?.join(', ') || 'Sin tecnologías',
+        tecnologias: tecnico.tecnologias?.join(', ') || 'Sin tecnolog├¡as',
       })),
     [tecnicos, sedesMap]
   );
 
   const reportesView = useMemo(
     () => [
-      { modulo: 'Órdenes', cantidad: ordenes.length },
+      { modulo: '├ôrdenes', cantidad: ordenes.length },
       { modulo: 'Visitas', cantidad: visitas.length },
       { modulo: 'Mantenimientos', cantidad: mantenimientos.length },
-      { modulo: 'Técnicos', cantidad: tecnicos.length },
+      { modulo: 'T├®cnicos', cantidad: tecnicos.length },
       { modulo: 'Empresas', cantidad: empresas.length },
       { modulo: 'Equipos', cantidad: equipos.length },
     ],
@@ -742,7 +742,7 @@ export default function App() {
     const filter = filterBySection[section];
     if (!filter || filter === 'TODOS') return rows;
 
-    if (section === 'Órdenes de servicio') {
+    if (section === '├ôrdenes de servicio') {
       return rows.filter((row) => row.estado === filter);
     }
 
@@ -761,23 +761,23 @@ export default function App() {
     return applyFilter(applySearch(rows, section), section);
   }
 
-  const filteredOrdenes = getFilteredRows('Órdenes de servicio', ordenesView);
-  const filteredVisitas = getFilteredRows('Visitas técnicas', visitasView);
+  const filteredOrdenes = getFilteredRows('├ôrdenes de servicio', ordenesView);
+  const filteredVisitas = getFilteredRows('Visitas t├®cnicas', visitasView);
   const filteredMantenimientos = getFilteredRows('Mantenimientos', mantenimientosView);
   const filteredEquipos = getFilteredRows('Equipos', equiposView);
   const filteredClientes = getFilteredRows('Clientes', clientesView);
-  const filteredTecnicos = getFilteredRows('Técnicos', tecnicosView);
+  const filteredTecnicos = getFilteredRows('T├®cnicos', tecnicosView);
   const filteredReportes = getFilteredRows('Reportes', reportesView);
 
   const sectionData = {
-    'Órdenes de servicio': {
-      title: 'Órdenes de servicio',
-      description: 'Gestión de órdenes creadas, en proceso y finalizadas.',
+    '├ôrdenes de servicio': {
+      title: '├ôrdenes de servicio',
+      description: 'Gesti├│n de ├│rdenes creadas, en proceso y finalizadas.',
       buttonText: 'Nueva orden',
-      searchPlaceholder: 'Buscar por número, empresa o técnico...',
+      searchPlaceholder: 'Buscar por n├║mero, empresa o t├®cnico...',
       filterOptions: ['TODOS', 'PROGRAMADA', 'EN_PROCESO', 'FINALIZADA'],
       filterLabel: 'Estado',
-      columns: ['ID', 'Número', 'Fecha programada', 'Estado', 'Empresa', 'Técnico', 'Acción'],
+      columns: ['ID', 'N├║mero', 'Fecha programada', 'Estado', 'Empresa', 'T├®cnico', 'Acci├│n'],
       rows: filteredOrdenes.map((orden) => [
         orden.id,
         orden.numero,
@@ -788,14 +788,14 @@ export default function App() {
         renderAccionOrden(orden, cambiarEstadoOrden, verDetalleOrden),
       ]),
     },
-    'Visitas técnicas': {
-      title: 'Visitas técnicas',
-      description: 'Planeación y seguimiento de visitas programadas a planta.',
+    'Visitas t├®cnicas': {
+      title: 'Visitas t├®cnicas',
+      description: 'Planeaci├│n y seguimiento de visitas programadas a planta.',
       buttonText: 'Nueva visita',
-      searchPlaceholder: 'Buscar por orden, técnico o ubicación...',
+      searchPlaceholder: 'Buscar por orden, t├®cnico o ubicaci├│n...',
       filterOptions: ['TODOS'],
       filterLabel: '',
-      columns: ['ID', 'Inicio', 'Fin', 'Orden', 'Técnico', 'Ubicación inicio', 'Ubicación fin'],
+      columns: ['ID', 'Inicio', 'Fin', 'Orden', 'T├®cnico', 'Ubicaci├│n inicio', 'Ubicaci├│n fin'],
       rows: filteredVisitas.map((visita) => [
         visita.id,
         visita.inicio,
@@ -810,10 +810,10 @@ export default function App() {
       title: 'Mantenimientos',
       description: 'Control de mantenimientos preventivos y correctivos.',
       buttonText: 'Nuevo mantenimiento',
-      searchPlaceholder: 'Buscar por tipo, descripción, orden o equipo...',
+      searchPlaceholder: 'Buscar por tipo, descripci├│n, orden o equipo...',
       filterOptions: ['TODOS', 'PREVENTIVO', 'CORRECTIVO'],
       filterLabel: 'Tipo',
-      columns: ['ID', 'Tipo', 'Descripción', 'Inicio', 'Fin', 'Orden', 'Equipo'],
+      columns: ['ID', 'Tipo', 'Descripci├│n', 'Inicio', 'Fin', 'Orden', 'Equipo'],
       rows: filteredMantenimientos.map((m) => [
         m.id,
         renderTipoBadge(m.tipo),
@@ -828,10 +828,10 @@ export default function App() {
       title: 'Equipos',
       description: 'Inventario y estado operativo de los equipos registrados.',
       buttonText: 'Nuevo equipo',
-      searchPlaceholder: 'Buscar por serial, referencia, empresa o tecnología...',
+      searchPlaceholder: 'Buscar por serial, referencia, empresa o tecnolog├¡a...',
       filterOptions: ['TODOS', 'ACTIVO', 'INACTIVO', 'MANTENIMIENTO'],
       filterLabel: 'Estado',
-      columns: ['ID', 'Serial', 'Referencia', 'Empresa', 'Tecnología', 'Estado'],
+      columns: ['ID', 'Serial', 'Referencia', 'Empresa', 'Tecnolog├¡a', 'Estado'],
       rows: filteredEquipos.map((equipo) => [
         equipo.id,
         equipo.serial,
@@ -845,10 +845,10 @@ export default function App() {
       title: 'Clientes',
       description: 'Empresas registradas y sus datos disponibles desde el DTO actual.',
       buttonText: 'Nuevo cliente',
-      searchPlaceholder: 'Buscar por nombre, sede o tecnología...',
+      searchPlaceholder: 'Buscar por nombre, sede o tecnolog├¡a...',
       filterOptions: ['TODOS'],
       filterLabel: '',
-      columns: ['ID', 'Nombre', 'Sede', 'Tecnologías'],
+      columns: ['ID', 'Nombre', 'Sede', 'Tecnolog├¡as'],
       rows: filteredClientes.map((empresa) => [
         empresa.id,
         empresa.nombre,
@@ -856,14 +856,14 @@ export default function App() {
         empresa.tecnologias,
       ]),
     },
-    Técnicos: {
-      title: 'Técnicos',
-      description: 'Personal técnico disponible para atención y visitas.',
-      buttonText: 'Nuevo técnico',
-      searchPlaceholder: 'Buscar por nombre o tecnología...',
+    T├®cnicos: {
+      title: 'T├®cnicos',
+      description: 'Personal t├®cnico disponible para atenci├│n y visitas.',
+      buttonText: 'Nuevo t├®cnico',
+      searchPlaceholder: 'Buscar por nombre o tecnolog├¡a...',
       filterOptions: ['TODOS'],
       filterLabel: '',
-      columns: ['ID', 'Nombre', 'Sede', 'Tecnologías'],
+      columns: ['ID', 'Nombre', 'Sede', 'Tecnolog├¡as'],
       rows: filteredTecnicos.map((tecnico) => [
         tecnico.id,
         tecnico.nombre,
@@ -875,10 +875,10 @@ export default function App() {
       title: 'Reportes',
       description: 'Indicadores operativos y reportes de servicio.',
       buttonText: 'Generar reporte',
-      searchPlaceholder: 'Buscar módulo...',
+      searchPlaceholder: 'Buscar m├│dulo...',
       filterOptions: ['TODOS'],
       filterLabel: '',
-      columns: ['Módulo', 'Cantidad'],
+      columns: ['M├│dulo', 'Cantidad'],
       rows: filteredReportes.map((r) => [r.modulo, r.cantidad]),
     },
   };
@@ -891,20 +891,17 @@ export default function App() {
       setLoading(true);
       setError('');
       
-      console.log(">>> [FRONTEND] Iniciando petición de login a: http://localhost:8080/auth/login");
       const res = await fetch('http://localhost:8080/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
-      console.log(">>> [FRONTEND] Respuesta del servidor: ", res.status);
       
       if (!res.ok) {
-         throw new Error('Usuario o contraseña incorrectos');
+         throw new Error('Usuario o contrase├▒a incorrectos');
       }
       
       const data = await res.json();
-      console.log(">>> [FRONTEND] Token y Rol recibidos: ", data.rol);
       setToken(data.token);
       setRolUsuario(data.rol);
       setPuedeCrearAdmin(data.puedeCrearAdmin);
@@ -946,7 +943,7 @@ export default function App() {
                 </div>
                 <h1 className="text-4xl font-bold tracking-tight">Bienvenido a ZION</h1>
                 <p className="mt-3 text-slate-300">
-                  Plataforma de gestión de servicio técnico industrial para órdenes,
+                  Plataforma de gesti├│n de servicio t├®cnico industrial para ├│rdenes,
                   visitas, mantenimientos y reportes.
                 </p>
               </div>
@@ -955,7 +952,7 @@ export default function App() {
                 onSubmit={handleLogin}
                 className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur"
               >
-                <h2 className="text-2xl font-semibold">Iniciar sesión</h2>
+                <h2 className="text-2xl font-semibold">Iniciar sesi├│n</h2>
                 <p className="mt-1 text-sm text-slate-300">
                   Ingresa tus credenciales para acceder al panel.
                 </p>
@@ -973,7 +970,7 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm text-slate-200">Contraseña</label>
+                    <label className="mb-2 block text-sm text-slate-200">Contrase├▒a</label>
                     <input
                       type="password"
                       value={password}
@@ -988,11 +985,11 @@ export default function App() {
                   type="submit"
                   className="mt-6 w-full rounded-2xl bg-white px-5 py-3 font-semibold text-slate-900 transition hover:bg-slate-200"
                 >
-                  Iniciar sesión
+                  Iniciar sesi├│n
                 </button>
 
                 <div className="mt-4 rounded-2xl bg-slate-900/70 p-4 text-sm text-slate-300">
-                  Demo visual: puedes ingresar cualquier correo y contraseña para entrar.
+                  Demo visual: puedes ingresar cualquier correo y contrase├▒a para entrar.
                 </div>
               </form>
             </div>
@@ -1007,7 +1004,7 @@ export default function App() {
                     <h3 className="text-2xl font-bold">Panel operativo ZION</h3>
                   </div>
                   <div className="rounded-2xl bg-emerald-400/20 px-3 py-2 text-sm text-emerald-300">
-                    En línea
+                    En l├¡nea
                   </div>
                 </div>
 
@@ -1083,18 +1080,18 @@ export default function App() {
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
             <div className="mb-5 flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-slate-900">Órdenes recientes</h3>
+              <h3 className="text-xl font-semibold text-slate-900">├ôrdenes recientes</h3>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-slate-200 text-sm text-slate-500">
-                    <th className="pb-3">Código</th>
+                    <th className="pb-3">C├│digo</th>
                     <th className="pb-3">Cliente</th>
                     <th className="pb-3">Estado</th>
-                    <th className="pb-3">Técnico</th>
-                    <th className="pb-3">Acción</th>
+                    <th className="pb-3">T├®cnico</th>
+                    <th className="pb-3">Acci├│n</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1123,8 +1120,8 @@ export default function App() {
             <h3 className="mb-5 text-xl font-semibold text-slate-900">Resumen r├ípido</h3>
 
             <div className="space-y-4">
-              <ResumenItem titulo="Órdenes registradas" valor={ordenes.length} />
-              <ResumenItem titulo="Técnicos registrados" valor={tecnicos.length} />
+              <ResumenItem titulo="├ôrdenes registradas" valor={ordenes.length} />
+              <ResumenItem titulo="T├®cnicos registrados" valor={tecnicos.length} />
               <ResumenItem titulo="Equipos registrados" valor={equipos.length} />
               <ResumenItem titulo="Visitas registradas" valor={visitas.length} />
               <ResumenItem titulo="Mantenimientos" valor={mantenimientos.length} />
@@ -1160,7 +1157,7 @@ export default function App() {
   }
 
   function renderFormularios(sectionName) {
-    if (sectionName === 'Técnicos' && mostrarFormularioTecnico) {
+    if (sectionName === 'T├®cnicos' && mostrarFormularioTecnico) {
       return (
         <form
           onSubmit={crearTecnico}
@@ -1185,7 +1182,7 @@ export default function App() {
 
           <input
             type="text"
-            placeholder="Teléfono"
+            placeholder="Tel├®fono"
             value={nuevoTecnico.telefono}
             onChange={(e) => setNuevoTecnico({ ...nuevoTecnico, telefono: e.target.value })}
             className={inputClass}
@@ -1214,7 +1211,7 @@ export default function App() {
           </select>
 
           <div className="md:col-span-2">
-            <p className="mb-3 font-semibold text-slate-800">Tecnologías</p>
+            <p className="mb-3 font-semibold text-slate-800">Tecnolog├¡as</p>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               {tecnologias.map((tec) => (
                 <label
@@ -1234,7 +1231,7 @@ export default function App() {
 
           <div className="md:col-span-2 flex gap-3">
             <button type="submit" className={primaryButtonClass}>
-              Guardar técnico
+              Guardar t├®cnico
             </button>
             <button
               type="button"
@@ -1273,7 +1270,7 @@ export default function App() {
 
           <input
             type="text"
-            placeholder="Dirección"
+            placeholder="Direcci├│n"
             value={nuevoCliente.direccion}
             onChange={(e) => setNuevoCliente({ ...nuevoCliente, direccion: e.target.value })}
             className={inputClass}
@@ -1311,7 +1308,7 @@ export default function App() {
           </select>
 
           <div className="md:col-span-2">
-            <p className="mb-3 font-semibold text-slate-800">Tecnologías</p>
+            <p className="mb-3 font-semibold text-slate-800">Tecnolog├¡as</p>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               {tecnologias.map((tec) => (
                 <label
@@ -1394,7 +1391,7 @@ export default function App() {
 
           <input
             type="text"
-            placeholder="Línea actual"
+            placeholder="L├¡nea actual"
             value={nuevoEquipo.lineaActual}
             onChange={(e) => setNuevoEquipo({ ...nuevoEquipo, lineaActual: e.target.value })}
             className={inputClass}
@@ -1444,7 +1441,7 @@ export default function App() {
             className={inputClass}
             required
           >
-            <option value="">Seleccione tecnología</option>
+            <option value="">Seleccione tecnolog├¡a</option>
             {tecnologias.map((tec) => (
               <option key={tec.id} value={tec.id}>
                 {tec.nombre}
@@ -1468,7 +1465,7 @@ export default function App() {
       );
     }
 
-    if (sectionName === 'Órdenes de servicio' && mostrarFormularioOrden) {
+    if (sectionName === '├ôrdenes de servicio' && mostrarFormularioOrden) {
       return (
         <form
           onSubmit={crearOrden}
@@ -1476,7 +1473,7 @@ export default function App() {
         >
           <input
             type="text"
-            placeholder="Número de orden"
+            placeholder="N├║mero de orden"
             value={nuevaOrden.numeroOrden}
             onChange={(e) => setNuevaOrden({ ...nuevaOrden, numeroOrden: e.target.value })}
             className={inputClass}
@@ -1521,7 +1518,7 @@ export default function App() {
             className={inputClass}
             required
           >
-            <option value="">Seleccione técnico</option>
+            <option value="">Seleccione t├®cnico</option>
             {tecnicos.map((tecnico) => (
               <option key={tecnico.id} value={tecnico.id}>
                 {tecnico.nombre}
@@ -1559,7 +1556,7 @@ export default function App() {
       );
     }
 
-    if (sectionName === 'Visitas técnicas' && mostrarFormularioVisita) {
+    if (sectionName === 'Visitas t├®cnicas' && mostrarFormularioVisita) {
       return (
         <form
           onSubmit={crearVisita}
@@ -1601,7 +1598,7 @@ export default function App() {
             className={inputClass}
             required
           >
-            <option value="">Seleccione técnico</option>
+            <option value="">Seleccione t├®cnico</option>
             {tecnicos.map((tecnico) => (
               <option key={tecnico.id} value={tecnico.id}>
                 {tecnico.nombre}
@@ -1619,7 +1616,7 @@ export default function App() {
 
           <input
             type="text"
-            placeholder="Ubicación inicio"
+            placeholder="Ubicaci├│n inicio"
             value={nuevaVisita.ubicacionInicio}
             onChange={(e) => setNuevaVisita({ ...nuevaVisita, ubicacionInicio: e.target.value })}
             className={inputClass}
@@ -1627,7 +1624,7 @@ export default function App() {
 
           <input
             type="text"
-            placeholder="Ubicación fin"
+            placeholder="Ubicaci├│n fin"
             value={nuevaVisita.ubicacionFin}
             onChange={(e) => setNuevaVisita({ ...nuevaVisita, ubicacionFin: e.target.value })}
             className={inputClass}
@@ -1639,7 +1636,7 @@ export default function App() {
               onClick={capturarUbicacionInicio}
               className={secondaryButtonClass}
             >
-              Capturar ubicación inicio
+              Capturar ubicaci├│n inicio
             </button>
 
             <button
@@ -1647,13 +1644,13 @@ export default function App() {
               onClick={capturarUbicacionFin}
               className={secondaryButtonClass}
             >
-              Capturar ubicación fin
+              Capturar ubicaci├│n fin
             </button>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:col-span-2 md:grid-cols-2">
-            <MiniMapa coordenadas={nuevaVisita.ubicacionInicio} titulo="Mapa ubicación inicio" />
-            <MiniMapa coordenadas={nuevaVisita.ubicacionFin} titulo="Mapa ubicación fin" />
+            <MiniMapa coordenadas={nuevaVisita.ubicacionInicio} titulo="Mapa ubicaci├│n inicio" />
+            <MiniMapa coordenadas={nuevaVisita.ubicacionFin} titulo="Mapa ubicaci├│n fin" />
           </div>
 
           <div className="md:col-span-2 flex gap-3">
@@ -1740,7 +1737,7 @@ export default function App() {
           />
 
           <textarea
-            placeholder="Descripción"
+            placeholder="Descripci├│n"
             value={nuevoMantenimiento.descripcion}
             onChange={(e) =>
               setNuevoMantenimiento({ ...nuevoMantenimiento, descripcion: e.target.value })
@@ -1771,7 +1768,7 @@ export default function App() {
   function toggleFormulario(sectionName) {
     limpiarMensajes();
 
-    if (sectionName === 'Técnicos') {
+    if (sectionName === 'T├®cnicos') {
       setMostrarFormularioTecnico(!mostrarFormularioTecnico);
       return;
     }
@@ -1786,12 +1783,12 @@ export default function App() {
       return;
     }
 
-    if (sectionName === 'Órdenes de servicio') {
+    if (sectionName === '├ôrdenes de servicio') {
       setMostrarFormularioOrden(!mostrarFormularioOrden);
       return;
     }
 
-    if (sectionName === 'Visitas técnicas') {
+    if (sectionName === 'Visitas t├®cnicas') {
       setMostrarFormularioVisita(!mostrarFormularioVisita);
       return;
     }
@@ -1825,7 +1822,7 @@ export default function App() {
         <div className="mb-6 grid grid-cols-1 gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-3">
           <div className="md:col-span-2">
             <label className="mb-2 block text-sm font-medium text-slate-600">
-              Búsqueda r├ípida
+              B├║squeda r├ípida
             </label>
             <input
               type="text"
@@ -1927,7 +1924,7 @@ export default function App() {
               <div className="mb-10">
                 <h1 className="text-3xl font-bold tracking-wide">ZION</h1>
                 <p className="mt-2 text-sm text-slate-300">
-                  Gestión de servicio técnico industrial
+                  Gesti├│n de servicio t├®cnico industrial
                 </p>
               </div>
 
@@ -1953,12 +1950,12 @@ export default function App() {
 
             <div className="rounded-2xl bg-slate-800 p-4 text-sm text-slate-300">
               <p className="font-semibold text-white">Usuario conectado</p>
-              <p className="mt-1">Administrador técnico</p>
+              <p className="mt-1">Administrador t├®cnico</p>
               <button
                 onClick={handleLogout}
                 className="mt-4 w-full rounded-xl border border-slate-600 px-3 py-2 text-left transition hover:bg-slate-700"
               >
-                Cerrar sesión
+                Cerrar sesi├│n
               </button>
             </div>
           </aside>
@@ -1996,15 +1993,15 @@ export default function App() {
               {!cargandoDetalleOrden && detalleOrden && (
                 <div className="space-y-6">
                   <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <TarjetaDato titulo="Número" valor={detalleOrden?.numeroOrden || 'Sin dato'} />
+                    <TarjetaDato titulo="N├║mero" valor={detalleOrden?.numeroOrden || 'Sin dato'} />
                     <TarjetaDato titulo="Estado" valor={detalleOrden?.estado || 'Sin dato'} />
                     <TarjetaDato titulo="Empresa" valor={detalleOrden?.empresaNombre || 'Sin dato'} />
-                    <TarjetaDato titulo="Técnico" valor={detalleOrden?.tecnicoNombre || 'Sin dato'} />
+                    <TarjetaDato titulo="T├®cnico" valor={detalleOrden?.tecnicoNombre || 'Sin dato'} />
                   </section>
 
                   <section className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                     <h4 className="mb-4 text-lg font-semibold text-slate-900">
-                      Tecnologías del técnico
+                      Tecnolog├¡as del t├®cnico
                     </h4>
 
                     <div className="flex flex-wrap gap-2">
@@ -2018,7 +2015,7 @@ export default function App() {
                       ))}
 
                       {(detalleOrden?.tecnicoTecnologias || []).length === 0 && (
-                        <span className="text-slate-500">No hay tecnologías asociadas.</span>
+                        <span className="text-slate-500">No hay tecnolog├¡as asociadas.</span>
                       )}
                     </div>
                   </section>
@@ -2034,7 +2031,7 @@ export default function App() {
                           <tr className="border-b border-slate-200 text-sm text-slate-500">
                             <th className="pb-3">ID</th>
                             <th className="pb-3">Tipo</th>
-                            <th className="pb-3">Descripción</th>
+                            <th className="pb-3">Descripci├│n</th>
                             <th className="pb-3">Inicio</th>
                             <th className="pb-3">Fin</th>
                           </tr>
@@ -2077,8 +2074,8 @@ export default function App() {
                             <th className="pb-3">ID</th>
                             <th className="pb-3">Inicio</th>
                             <th className="pb-3">Fin</th>
-                            <th className="pb-3">Ubicación inicio</th>
-                            <th className="pb-3">Ubicación fin</th>
+                            <th className="pb-3">Ubicaci├│n inicio</th>
+                            <th className="pb-3">Ubicaci├│n fin</th>
                             <th className="pb-3">Observaciones</th>
                           </tr>
                         </thead>
@@ -2151,7 +2148,7 @@ function MiniMapa({ coordenadas, titulo }) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
         <p className="mb-2 font-medium text-slate-700">{titulo}</p>
-        <p className="text-sm text-slate-500">Aún no hay coordenadas v├ílidas.</p>
+        <p className="text-sm text-slate-500">A├║n no hay coordenadas v├ílidas.</p>
       </div>
     );
   }
