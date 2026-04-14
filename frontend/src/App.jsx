@@ -973,11 +973,11 @@ export default function App() {
                   </span>
                   Sistema empresarial v2.0
                 </div>
-                <h1 className="text-5xl font-bold tracking-tight font-display bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                <h1 className="text-5xl md:text-6xl font-black tracking-tighter font-display bg-gradient-to-br from-white via-slate-200 to-slate-500 bg-clip-text text-transparent leading-[1.1]">
                   Bienvenido a ZION
                 </h1>
-                <p className="mt-4 text-slate-400 font-medium leading-relaxed">
-                  Plataforma avanzada de gestión técnica industrial. Accede para controlar órdenes, visitas y mantenimientos en tiempo real.
+                <p className="mt-6 text-lg text-slate-400 font-medium leading-relaxed max-w-sm">
+                  Plataforma avanzada de gestión técnica industrial. Accede para controlar sus operaciones en tiempo real.
                 </p>
               </div>
 
@@ -987,8 +987,8 @@ export default function App() {
               >
                 <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
                 
-                <h2 className="text-2xl font-bold font-display">Iniciar sesión</h2>
-                <p className="mt-2 text-sm text-slate-400 font-medium mb-8">
+                <h2 className="text-3xl font-bold font-display tracking-tight text-white">Iniciar sesión</h2>
+                <p className="mt-2 text-sm text-slate-400 font-medium mb-10">
                   Ingresa tus credenciales para acceder al panel administrativo.
                 </p>
 
@@ -1104,8 +1104,8 @@ export default function App() {
       <>
         <header className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-4xl font-bold text-slate-900 font-display">Dashboard</h2>
-            <p className="mt-1 text-slate-500 font-medium">
+            <h2 className="text-4xl font-extrabold text-slate-900 font-display tracking-tighter">Dashboard</h2>
+            <p className="mt-1 text-slate-500 font-medium text-lg">
               Control general del estado operativo de ZION
             </p>
           </div>
@@ -1144,8 +1144,8 @@ export default function App() {
                   </div>
                   <div className="h-1.5 w-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 group-hover:animate-pulse transition-soft"></div>
                 </div>
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-wider font-display">{stat.title}</p>
-                <p className="mt-2 text-4xl font-bold text-slate-900 font-display tabular-nums leading-tight">
+                <p className="text-xs font-black text-slate-500 uppercase tracking-[0.1em] font-display">{stat.title}</p>
+                <p className="mt-1 text-5xl font-black text-slate-900 font-display tabular-nums tracking-tighter">
                   {stat.value}
                 </p>
               </div>
@@ -1162,7 +1162,7 @@ export default function App() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-slate-200 text-sm text-slate-500">
+                  <tr className="border-b border-slate-200 text-xs font-black uppercase tracking-widest text-slate-400">
                     <th className="pb-3">Código</th>
                     <th className="pb-3">Cliente</th>
                     <th className="pb-3">Estado</th>
@@ -1193,7 +1193,7 @@ export default function App() {
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-xl font-semibold text-slate-900">Resumen rápido</h3>
+            <h3 className="mb-6 text-2xl font-bold text-slate-950 font-display tracking-tight">Resumen rápido</h3>
 
             <div className="space-y-4">
               <ResumenItem titulo="Órdenes registradas" valor={ordenes.length} />

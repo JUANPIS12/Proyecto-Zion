@@ -1,4 +1,4 @@
-package com.zion.zionbackend.controller;
+package com.controller;
 
 import com.zion.zionbackend.dto.TecnologiaCreateDTO;
 import com.zion.zionbackend.dto.TecnologiaDTO;
