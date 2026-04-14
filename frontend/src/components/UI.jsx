@@ -1,10 +1,10 @@
 import React from 'react';
 
 export const Button = ({ children, variant = 'primary', size = 'md', className = '', ...props }) => {
-  const base = 'inline-flex items-center justify-center font-medium transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none';
+  const base = 'inline-flex items-center justify-center font-bold tracking-tight transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none';
   
   const variants = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-[0_0_20px_rgba(79,70,229,0.3)]',
+    primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-premium hover:shadow-premium-xl',
     secondary: 'bg-slate-700 text-white hover:bg-slate-600 border border-slate-600',
     outline: 'bg-transparent border border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10',
     ghost: 'bg-transparent hover:bg-slate-800 text-slate-300',
@@ -12,9 +12,9 @@ export const Button = ({ children, variant = 'primary', size = 'md', className =
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-3 py-1.5 text-xs tracking-wide uppercase font-black',
+    md: 'px-5 py-2.5',
+    lg: 'px-8 py-4 text-lg',
   };
 
   return (
@@ -28,13 +28,13 @@ export const Button = ({ children, variant = 'primary', size = 'md', className =
 };
 
 export const Input = ({ label, error, className = '', ...props }) => (
-  <div className={`flex flex-col gap-1.5 ${className}`}>
-    {label && <label className="text-sm font-medium text-slate-400 px-1">{label}</label>}
+  <div className={`flex flex-col gap-2 ${className}`}>
+    {label && <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 px-1">{label}</label>}
     <input 
-      className={`w-full bg-slate-800/50 border ${error ? 'border-red-500/50' : 'border-slate-700'} rounded-lg px-4 py-2.5 text-white outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all`}
+      className={`w-full bg-slate-800/50 border ${error ? 'border-red-500/50' : 'border-slate-800'} rounded-2xl px-5 py-3 text-white outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-soft text-sm font-medium`}
       {...props}
     />
-    {error && <span className="text-xs text-red-400 px-1">{error}</span>}
+    {error && <span className="text-xs font-medium text-red-400 px-1">{error}</span>}
   </div>
 );
 
@@ -48,7 +48,7 @@ export const Badge = ({ children, variant = 'info', className = '' }) => {
   };
 
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${variants[variant]} ${className}`}>
+    <span className={`px-3 py-1 rounded-lg text-[10px] uppercase font-black tracking-widest border ${variants[variant]} ${className}`}>
       {children}
     </span>
   );

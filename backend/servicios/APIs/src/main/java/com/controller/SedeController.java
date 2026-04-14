@@ -21,4 +21,9 @@ public class SedeController {
     public List<Sede> listar() {
         return sedeRepository.findAll();
     }
+
+    @PostMapping
+    public Sede crear(@RequestBody Sede sede) {
+        return sedeRepository.save(sede);
+    }
 }

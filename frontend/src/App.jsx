@@ -1,4 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
+import {
+  LayoutDashboard,
+  ClipboardList,
+  MapPin,
+  Wrench,
+  Settings,
+  Users,
+  Building2,
+  FileText,
+  LogOut,
+  Plus,
+  Search,
+  Filter,
+  RefreshCw,
+  Eye,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  ChevronRight,
+  ShieldCheck,
+  Globe
+} from 'lucide-react';
+
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -17,6 +40,9 @@ export default function App() {
   const [mostrarFormularioOrden, setMostrarFormularioOrden] = useState(false);
   const [mostrarFormularioVisita, setMostrarFormularioVisita] = useState(false);
   const [mostrarFormularioMantenimiento, setMostrarFormularioMantenimiento] = useState(false);
+  const [mostrarFormularioSede, setMostrarFormularioSede] = useState(false);
+  const [mostrarFormularioCoordinador, setMostrarFormularioCoordinador] = useState(false);
+
 
   const [ordenes, setOrdenes] = useState([]);
   const [tecnicos, setTecnicos] = useState([]);
@@ -26,6 +52,7 @@ export default function App() {
   const [tecnologias, setTecnologias] = useState([]);
   const [visitas, setVisitas] = useState([]);
   const [mantenimientos, setMantenimientos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +80,8 @@ export default function App() {
     Clientes: 'TODOS',
     Técnicos: 'TODOS',
     Reportes: 'TODOS',
+    Sedes: 'TODOS',
+    Coordinadores: 'TODOS',
   });
 
   const [nuevoTecnico, setNuevoTecnico] = useState({
@@ -115,16 +144,35 @@ export default function App() {
     equipoId: '',
   });
 
-  const menu = [
-    'Dashboard',
-    'Órdenes de servicio',
-    'Visitas técnicas',
-    'Mantenimientos',
-    'Equipos',
-    'Clientes',
-    'Técnicos',
-    'Reportes',
-  ];
+  const [nuevaSede, setNuevaSede] = useState({
+    nombre: '',
+    ciudad: '',
+    direccion: '',
+  });
+
+  const [nuevoCoordinador, setNuevoCoordinador] = useState({
+    username: '',
+    password: '',
+  });
+
+  const menu = useMemo(() => {
+    const defaultMenu = [
+      'Dashboard',
+      'Órdenes de servicio',
+      'Visitas técnicas',
+      'Mantenimientos',
+      'Equipos',
+      'Clientes',
+      'Técnicos',
+      'Reportes'
+    ];
+
+    if (rolUsuario === 'ROLE_ADMIN') {
+      return [...defaultMenu, 'Sedes', 'Coordinadores'];
+    }
+
+    return defaultMenu;
+  }, [rolUsuario]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -217,10 +265,48 @@ export default function App() {
       setTecnologias(tecnologiasData);
       setVisitas(visitasData);
       setMantenimientos(mantenimientosData);
+
+      if (rolUsuario === 'ROLE_ADMIN') {
+        const usuariosData = await fetchJson(`${API_URL.replace('/api', '')}/admin/usuarios`);
+        setUsuarios(usuariosData);
+      }
     } catch (err) {
       setError(err.message || 'Error cargando datos');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function crearSede(e) {
+    e.preventDefault();
+    try {
+      limpiarMensajes();
+      await postJson(`${API_URL}/sedes`, nuevaSede);
+      setSuccess('Sede creada correctamente.');
+      setNuevaSede({ nombre: '', ciudad: '', direccion: '' });
+      setMostrarFormularioSede(false);
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo crear la sede');
+    }
+  }
+
+  async function crearCoordinador(e) {
+    e.preventDefault();
+    try {
+      limpiarMensajes();
+      const payload = {
+        username: nuevoCoordinador.username,
+        password: nuevoCoordinador.password,
+        rol: 'ROLE_COORDINADOR',
+      };
+      await postJson(`${API_URL.replace('/api', '')}/admin/usuarios`, payload);
+      setSuccess('Coordinador creado correctamente.');
+      setNuevoCoordinador({ username: '', password: '' });
+      setMostrarFormularioCoordinador(false);
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo crear el coordinador');
     }
   }
 
@@ -619,15 +705,25 @@ export default function App() {
 
     const ordenesFinalizadas = ordenes.filter((o) => o.estado === 'FINALIZADA').length;
 
-    return [
+    const baseStats = [
       { title: 'Órdenes abiertas', value: String(ordenesAbiertas) },
       { title: 'Órdenes finalizadas', value: String(ordenesFinalizadas) },
       { title: 'Técnicos activos', value: String(tecnicos.length) },
-      { title: 'Visitas registradas', value: String(visitas.length) },
+      { title: 'Visitas técnicas', value: String(visitas.length) },
       { title: 'Mantenimientos', value: String(mantenimientos.length) },
       { title: 'Equipos registrados', value: String(equipos.length) },
     ];
-  }, [ordenes, tecnicos, visitas, mantenimientos, equipos]);
+
+    if (rolUsuario === 'ROLE_ADMIN') {
+      return [
+        ...baseStats,
+        { title: 'Sedes registradas', value: String(sedes.length) },
+        { title: 'Coordinadores', value: String(usuarios.filter(u => u.rol === 'ROLE_COORDINADOR').length) },
+      ];
+    }
+
+    return baseStats;
+  }, [ordenes, tecnicos, visitas, mantenimientos, equipos, sedes, usuarios, rolUsuario]);
 
   const recentOrders = useMemo(() => {
     return ordenes.slice(0, 5).map((orden) => ({
@@ -715,6 +811,30 @@ export default function App() {
     [tecnicos, sedesMap]
   );
 
+  const sedesView = useMemo(
+    () =>
+      sedes.map((s) => ({
+        id: s.id,
+        nombre: s.nombre,
+        ciudad: s.ciudad || 'Sin dato',
+        direccion: s.direccion || 'Sin dato',
+      })),
+    [sedes]
+  );
+
+  const coordinadoresView = useMemo(
+    () =>
+      usuarios
+        .filter((u) => u.rol === 'ROLE_COORDINADOR')
+        .map((u) => ({
+          id: u.id,
+          username: u.username,
+          rol: u.rol,
+          activo: u.activo ? 'Sí' : 'No',
+        })),
+    [usuarios]
+  );
+
   const reportesView = useMemo(
     () => [
       { modulo: 'Órdenes', cantidad: ordenes.length },
@@ -768,6 +888,8 @@ export default function App() {
   const filteredClientes = getFilteredRows('Clientes', clientesView);
   const filteredTecnicos = getFilteredRows('Técnicos', tecnicosView);
   const filteredReportes = getFilteredRows('Reportes', reportesView);
+  const filteredSedes = getFilteredRows('Sedes', sedesView);
+  const filteredCoordinadores = getFilteredRows('Coordinadores', coordinadoresView);
 
   const sectionData = {
     'Órdenes de servicio': {
@@ -881,16 +1003,41 @@ export default function App() {
       columns: ['Módulo', 'Cantidad'],
       rows: filteredReportes.map((r) => [r.modulo, r.cantidad]),
     },
+    Sedes: {
+      title: 'Gestión de Sedes',
+      description: 'Control centralizado de ubicaciones físicas y bases operativas.',
+      buttonText: 'Registrar sede',
+      searchPlaceholder: 'Buscar por nombre o ciudad...',
+      filterOptions: ['TODOS'],
+      filterLabel: '',
+      columns: ['ID', 'Nombre', 'Ciudad', 'Dirección'],
+      rows: filteredSedes.map((s) => [s.id, s.nombre, s.ciudad, s.direccion]),
+    },
+    Coordinadores: {
+      title: 'Coordinadores del Sistema',
+      description: 'Administración de accesos y perfiles de coordinación regional.',
+      buttonText: 'Crear coordinador',
+      searchPlaceholder: 'Buscar por usuario...',
+      filterOptions: ['TODOS'],
+      filterLabel: '',
+      columns: ['ID', 'Usuario', 'Rol', 'Estado'],
+      rows: filteredCoordinadores.map((c) => [
+        c.id,
+        c.username,
+        <span className="font-bold text-slate-400">{c.rol}</span>,
+        renderEstadoBadge(c.activo === 'Sí' ? 'ACTIVO' : 'INACTIVO')
+      ]),
+    },
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return;
-    
+
     try {
       setLoading(true);
       setError('');
-      
+
       console.log(">>> [FRONTEND] Iniciando petición de login a: http://localhost:8080/auth/login");
       const res = await fetch('http://localhost:8080/auth/login', {
         method: 'POST',
@@ -898,18 +1045,18 @@ export default function App() {
         body: JSON.stringify({ username, password })
       });
       console.log(">>> [FRONTEND] Respuesta del servidor: ", res.status);
-      
+
       if (!res.ok) {
-         throw new Error('Usuario o contraseña incorrectos');
+        throw new Error('Usuario o contraseña incorrectos');
       }
-      
+
       const data = await res.json();
       console.log(">>> [FRONTEND] Token y Rol recibidos: ", data.rol);
       setToken(data.token);
       setRolUsuario(data.rol);
       setPuedeCrearAdmin(data.puedeCrearAdmin);
       setIsLoggedIn(true);
-      
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('rol', data.rol);
       localStorage.setItem('puedeCrearAdmin', data.puedeCrearAdmin);
@@ -936,103 +1083,143 @@ export default function App() {
 
   function renderLogin() {
     return (
-      <div className="min-h-screen bg-slate-950 text-white">
+      <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-blue-500/30">
         <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-          <div className="flex items-center justify-center p-8 lg:p-14">
+          {/* Lado Izquierdo: Formulario */}
+          <div className="relative flex items-center justify-center p-8 lg:p-20 z-10">
             <div className="w-full max-w-md">
-              <div className="mb-10">
-                <div className="mb-4 inline-flex rounded-2xl bg-white/10 px-4 py-2 text-sm text-slate-200">
-                  Sistema empresarial
+              <div className="mb-12">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 shadow-premium">
+                  <span className="text-2xl font-bold italic">Z</span>
                 </div>
-                <h1 className="text-4xl font-bold tracking-tight">Bienvenido a ZION</h1>
-                <p className="mt-3 text-slate-300">
-                  Plataforma de gestión de servicio técnico industrial para órdenes,
-                  visitas, mantenimientos y reportes.
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-500/10 border border-blue-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-400">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  </span>
+                  Sistema empresarial v2.0
+                </div>
+                <h1 className="text-5xl md:text-6xl font-black tracking-tighter font-display bg-gradient-to-br from-white via-slate-200 to-slate-500 bg-clip-text text-transparent leading-[1.1]">
+                  Bienvenido a ZION
+                </h1>
+                <p className="mt-6 text-lg text-slate-400 font-medium leading-relaxed max-w-sm">
+                  Plataforma avanzada de gestión técnica industrial. Accede para controlar sus operaciones en tiempo real.
                 </p>
               </div>
 
               <form
                 onSubmit={handleLogin}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur"
+                className="group relative rounded-[2.5rem] border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl transition-soft hover:border-white/20"
               >
-                <h2 className="text-2xl font-semibold">Iniciar sesión</h2>
-                <p className="mt-1 text-sm text-slate-300">
-                  Ingresa tus credenciales para acceder al panel.
+                <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
+
+                <h2 className="text-3xl font-bold font-display tracking-tight text-white">Iniciar sesión</h2>
+                <p className="mt-2 text-sm text-slate-400 font-medium mb-8">
+                  Ingresa tus credenciales para acceder al panel administrativo.
                 </p>
 
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <label className="mb-2 block text-sm text-slate-200">Usuario</label>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Ej: admin"
-                      className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-slate-400"
-                    />
+                {error && (
+                  <div className="mb-6 flex items-center gap-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm font-semibold text-rose-400 animate-shake">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Usuario</label>
+                    <div className="relative">
+                      <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="admin"
+                        className="w-full rounded-2xl border border-white/5 bg-slate-900/50 py-4 pl-12 pr-4 text-white outline-none transition-soft focus:border-blue-500 focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/10"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm text-slate-200">Contraseña</label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó"
-                      className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-slate-400"
-                    />
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Contraseña</label>
+                    <div className="relative">
+                      <Settings className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full rounded-2xl border border-white/5 bg-slate-900/50 py-4 pl-12 pr-4 text-white outline-none transition-soft focus:border-blue-500 focus:bg-slate-900 focus:ring-4 focus:ring-blue-500/10"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="mt-6 w-full rounded-2xl bg-white px-5 py-3 font-semibold text-slate-900 transition hover:bg-slate-200"
+                  disabled={loading}
+                  className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 font-bold text-slate-950 transition-soft hover:bg-blue-50 hover:shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] active:scale-95 disabled:opacity-50"
                 >
-                  Iniciar sesión
+                  {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : 'Entrar al sistema'}
                 </button>
 
-                <div className="mt-4 rounded-2xl bg-slate-900/70 p-4 text-sm text-slate-300">
-                  Demo visual: puedes ingresar cualquier correo y contraseña para entrar.
+                <div className="mt-6 flex items-center gap-3 rounded-2xl bg-blue-500/5 p-4 text-xs font-medium text-slate-400 border border-blue-500/10">
+                  <AlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                  <span>Demo: utiliza cualquier credencial para explorar la interfaz.</span>
                 </div>
               </form>
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-14">
-            <div className="w-full max-w-xl">
-              <div className="rounded-[2rem] border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur">
-                <div className="mb-8 flex items-center justify-between">
+          {/* Lado Derecho: Preview Visual */}
+          <div className="relative hidden lg:flex items-center justify-center bg-slate-900 p-20 overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-[80%] h-[80%] bg-blue-600/20 blur-[120px] rounded-full -mr-40 -mt-40"></div>
+            <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-indigo-600/10 blur-[100px] rounded-full -ml-20 -mb-20"></div>
+
+            <div className="relative w-full max-w-xl">
+              <div className="rounded-[2.5rem] border border-white/10 bg-slate-950/40 p-10 shadow-2xl backdrop-blur-2xl ring-1 ring-white/10">
+                <div className="mb-10 flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-300">Vista previa del sistema</p>
-                    <h3 className="text-2xl font-bold">Panel operativo ZION</h3>
+                    <h3 className="text-3xl font-bold font-display">ZION Dashboard</h3>
+                    <p className="mt-1 text-slate-400 font-medium">Real-time technician monitoring</p>
                   </div>
-                  <div className="rounded-2xl bg-emerald-400/20 px-3 py-2 text-sm text-emerald-300">
-                    En línea
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 shadow-premium">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                   </div>
                 </div>
 
-                <div className="mb-6 grid grid-cols-2 gap-4">
-                  {stats.slice(0, 4).map((stat) => (
-                    <div
-                      key={stat.title}
-                      className="rounded-2xl border border-white/10 bg-slate-900/60 p-4"
-                    >
-                      <p className="text-sm text-slate-300">{stat.title}</p>
-                      <p className="mt-2 text-3xl font-bold">{stat.value}</p>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 gap-5 mb-8">
+                  <div className="rounded-3xl border border-white/5 bg-white/5 p-6 hover:bg-white/10 transition-soft">
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Orders</p>
+                    <p className="mt-2 text-4xl font-bold font-display tracking-tight">2,482</p>
+                  </div>
+                  <div className="rounded-3xl border border-white/5 bg-white/5 p-6 hover:bg-white/10 transition-soft">
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Active</p>
+                    <p className="mt-2 text-4xl font-bold font-display tracking-tight text-blue-400">184</p>
+                  </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h4 className="font-semibold">Actividad reciente</h4>
-                    <span className="text-sm text-slate-300">Hoy</span>
+                <div className="rounded-3xl border border-white/5 bg-slate-900/50 p-6">
+                  <div className="mb-5 flex items-center justify-between">
+                    <h4 className="font-bold font-display flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-400" />
+                      Recent Activity
+                    </h4>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 px-2 py-1 bg-white/5 rounded-lg">Syncing...</span>
                   </div>
 
-                  <div className="space-y-3">
-                    {recentOrders.map((order) => (
-                      <div key={order.id} className="rounded-xl bg-white/5 p-3">
-                        {order.codigo} - {order.estado}
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-4 rounded-2xl bg-white/5 p-4 border border-white/5">
+                        <div className="h-10 w-10 rounded-xl bg-slate-800 flex items-center justify-center">
+                          <MapPin className="w-5 h-5 text-slate-400" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="h-2 w-32 bg-slate-700 rounded-full mb-2"></div>
+                          <div className="h-1.5 w-20 bg-slate-800 rounded-full"></div>
+                        </div>
+                        <div className="h-2 w-10 bg-blue-500/20 rounded-full"></div>
                       </div>
                     ))}
                   </div>
@@ -1048,10 +1235,10 @@ export default function App() {
   function renderDashboard() {
     return (
       <>
-        <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <header className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900">Panel principal</h2>
-            <p className="mt-1 text-slate-500">
+            <h2 className="text-4xl font-extrabold text-slate-900 font-display tracking-tighter">Dashboard</h2>
+            <p className="mt-1 text-slate-500 font-medium text-lg">
               Control general del estado operativo de ZION
             </p>
           </div>
@@ -1059,25 +1246,47 @@ export default function App() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={cargarDatos}
-              className={primaryButtonClass}
+              className={`${primaryButtonClass} flex items-center gap-2`}
             >
-              Recargar datos
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Actualizar
             </button>
           </div>
         </header>
 
         {renderMensajes()}
 
-        <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {stats.map((stat) => (
-            <div
-              key={stat.title}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <p className="text-sm text-slate-500">{stat.title}</p>
-              <p className="mt-3 text-3xl font-bold text-slate-900">{stat.value}</p>
-            </div>
-          ))}
+        <section className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {stats.map((stat) => {
+            const iconMapStats = {
+              'Órdenes abiertas': <ClipboardList className="w-6 h-6 text-blue-500" />,
+              'Órdenes finalizadas': <CheckCircle2 className="w-6 h-6 text-emerald-500" />,
+              'Técnicos activos': <Users className="w-6 h-6 text-indigo-500" />,
+              'Visitas técnicas': <MapPin className="w-6 h-6 text-rose-500" />,
+              'Mantenimientos': <Wrench className="w-6 h-6 text-amber-500" />,
+              'Equipos registrados': <Settings className="w-6 h-6 text-slate-500" />,
+              'Sedes registradas': <Globe className="w-6 h-6 text-blue-400" />,
+              'Coordinadores': <ShieldCheck className="w-6 h-6 text-indigo-400" />,
+            };
+
+            return (
+              <div
+                key={stat.title}
+                className="group relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-7 shadow-premium transition-soft hover:-translate-y-1 hover:shadow-premium-xl active:scale-95"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-100 group-hover:bg-blue-50 group-hover:ring-blue-100 transition-soft">
+                    {iconMapStats[stat.title] || <LayoutDashboard className="w-6 h-6" />}
+                  </div>
+                  <div className="h-1.5 w-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 group-hover:animate-pulse transition-soft"></div>
+                </div>
+                <p className="text-xs font-black text-slate-500 uppercase tracking-[0.1em] font-display">{stat.title}</p>
+                <p className="mt-1 text-5xl font-black text-slate-900 font-display tabular-nums tracking-tighter">
+                  {stat.value}
+                </p>
+              </div>
+            );
+          })}
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -1089,7 +1298,7 @@ export default function App() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-slate-200 text-sm text-slate-500">
+                  <tr className="border-b border-slate-200 text-xs font-black uppercase tracking-widest text-slate-400">
                     <th className="pb-3">Código</th>
                     <th className="pb-3">Cliente</th>
                     <th className="pb-3">Estado</th>
@@ -1120,7 +1329,7 @@ export default function App() {
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-xl font-semibold text-slate-900">Resumen r├ípido</h3>
+            <h3 className="mb-6 text-2xl font-bold text-slate-950 font-display tracking-tight">Resumen rápido</h3>
 
             <div className="space-y-4">
               <ResumenItem titulo="Órdenes registradas" valor={ordenes.length} />
@@ -1128,6 +1337,11 @@ export default function App() {
               <ResumenItem titulo="Equipos registrados" valor={equipos.length} />
               <ResumenItem titulo="Visitas registradas" valor={visitas.length} />
               <ResumenItem titulo="Mantenimientos" valor={mantenimientos.length} />
+              <ResumenItem titulo="Sedes activas" valor={sedes.length} />
+              <ResumenItem
+                titulo="Coordinadores"
+                valor={usuarios.filter(u => u.rol === 'ROLE_COORDINADOR').length}
+              />
             </div>
           </div>
         </section>
@@ -1137,25 +1351,28 @@ export default function App() {
 
   function renderMensajes() {
     return (
-      <>
+      <div className="space-y-4 mb-8">
         {loading && (
-          <div className="mb-4 rounded-2xl bg-blue-50 px-4 py-3 text-blue-700">
-            Cargando datos...
+          <div className="flex items-center gap-3 rounded-2xl bg-blue-50/50 border border-blue-100 px-5 py-4 text-blue-700 font-medium animate-pulse">
+            <RefreshCw className="w-5 h-5 animate-spin text-blue-500" />
+            Cargando información del sistema...
           </div>
         )}
 
         {error && (
-          <div className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+          <div className="flex items-center gap-3 rounded-2xl bg-rose-50 border border-rose-100 px-5 py-4 text-rose-700 font-semibold shadow-sm">
+            <AlertCircle className="w-5 h-5 text-rose-500" />
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-emerald-700">
+          <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 border border-emerald-100 px-5 py-4 text-emerald-700 font-semibold shadow-sm">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
             {success}
           </div>
         )}
-      </>
+      </div>
     );
   }
 
@@ -1765,6 +1982,135 @@ export default function App() {
       );
     }
 
+    if (sectionName === 'Sedes' && mostrarFormularioSede) {
+      return (
+        <form
+          onSubmit={crearSede}
+          className="group relative mb-8 grid grid-cols-1 gap-6 rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-premium transition-soft hover:shadow-premium-xl md:grid-cols-2"
+        >
+          <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
+
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-bold font-display text-slate-900 border-l-4 border-blue-500 pl-4">Registro de Nueva Sede</h3>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Nombre</label>
+            <div className="relative">
+              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Ej. Sede Norte Principal"
+                value={nuevaSede.nombre}
+                onChange={(e) => setNuevaSede({ ...nuevaSede, nombre: e.target.value })}
+                className={`${inputClass} pl-12`}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Ciudad</label>
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Ej. Bogotá"
+                value={nuevaSede.ciudad}
+                onChange={(e) => setNuevaSede({ ...nuevaSede, ciudad: e.target.value })}
+                className={`${inputClass} pl-12`}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Dirección Exacta</label>
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Calle 123 # 45 - 67"
+                value={nuevaSede.direccion}
+                onChange={(e) => setNuevaSede({ ...nuevaSede, direccion: e.target.value })}
+                className={`${inputClass} pl-12`}
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2 flex gap-3 pt-4">
+            <button type="submit" className={primaryButtonClass}>
+              Guardar sede
+            </button>
+            <button
+              type="button"
+              onClick={() => setMostrarFormularioSede(false)}
+              className={secondaryButtonClass}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      );
+    }
+
+    if (sectionName === 'Coordinadores' && mostrarFormularioCoordinador) {
+      return (
+        <form
+          onSubmit={crearCoordinador}
+          className="group relative mb-8 grid grid-cols-1 gap-6 rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-premium transition-soft hover:shadow-premium-xl md:grid-cols-2"
+        >
+          <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
+
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-bold font-display text-slate-900 border-l-4 border-indigo-500 pl-4">Alta de Coordinador</h3>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Usuario</label>
+            <div className="relative">
+              <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="ej_coordinador"
+                value={nuevoCoordinador.username}
+                onChange={(e) => setNuevoCoordinador({ ...nuevoCoordinador, username: e.target.value })}
+                className={`${inputClass} pl-12`}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Contraseña segura</label>
+            <div className="relative">
+              <Settings className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={nuevoCoordinador.password}
+                onChange={(e) => setNuevoCoordinador({ ...nuevoCoordinador, password: e.target.value })}
+                className={`${inputClass} pl-12`}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2 flex gap-3 pt-4">
+            <button type="submit" className={primaryButtonClass}>
+              Guardar coordinador
+            </button>
+            <button
+              type="button"
+              onClick={() => setMostrarFormularioCoordinador(false)}
+              className={secondaryButtonClass}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      );
+    }
+
     return null;
   }
 
@@ -1798,6 +2144,16 @@ export default function App() {
 
     if (sectionName === 'Mantenimientos') {
       setMostrarFormularioMantenimiento(!mostrarFormularioMantenimiento);
+      return;
+    }
+
+    if (sectionName === 'Sedes') {
+      setMostrarFormularioSede(!mostrarFormularioSede);
+      return;
+    }
+
+    if (sectionName === 'Coordinadores') {
+      setMostrarFormularioCoordinador(!mostrarFormularioCoordinador);
     }
   }
 
@@ -1806,62 +2162,69 @@ export default function App() {
 
     return (
       <>
-        <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <header className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900">{section.title}</h2>
-            <p className="mt-1 text-slate-500">{section.description}</p>
+            <h2 className="text-4xl font-bold text-slate-900 font-display">{section.title}</h2>
+            <p className="mt-1 text-slate-500 font-medium">{section.description}</p>
           </div>
 
           <button
             onClick={() => toggleFormulario(sectionName)}
-            className={primaryButtonClass}
+            className={`${primaryButtonClass} flex items-center gap-2`}
           >
+            <Plus className="w-5 h-5" />
             {section.buttonText}
           </button>
         </header>
 
         {renderMensajes()}
 
-        <div className="mb-6 grid grid-cols-1 gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-3">
+        <div className="mb-8 grid grid-cols-1 gap-6 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-premium md:grid-cols-3">
           <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-slate-600">
-              Búsqueda r├ípida
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">
+              Búsqueda rápida
             </label>
-            <input
-              type="text"
-              value={searchBySection[sectionName] || ''}
-              onChange={(e) =>
-                setSearchBySection((prev) => ({
-                  ...prev,
-                  [sectionName]: e.target.value,
-                }))
-              }
-              placeholder={section.searchPlaceholder}
-              className={inputClass}
-            />
-          </div>
-
-          {section.filterOptions.length > 1 ? (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-600">
-                {section.filterLabel}
-              </label>
-              <select
-                value={filterBySection[sectionName] || 'TODOS'}
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchBySection[sectionName] || ''}
                 onChange={(e) =>
-                  setFilterBySection((prev) => ({
+                  setSearchBySection((prev) => ({
                     ...prev,
                     [sectionName]: e.target.value,
                   }))
                 }
-                className={inputClass}
-              >
-                {section.filterOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+                placeholder={section.searchPlaceholder}
+                className={`${inputClass} pl-11`}
+              />
+            </div>
+          </div>
+
+          {section.filterOptions.length > 1 ? (
+            <div>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">
+                {section.filterLabel}
+              </label>
+              <div className="relative">
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <select
+                  value={filterBySection[sectionName] || 'TODOS'}
+                  onChange={(e) =>
+                    setFilterBySection((prev) => ({
+                      ...prev,
+                      [sectionName]: e.target.value,
+                    }))
+                  }
+                  className={`${inputClass} pl-11`}
+                >
+                  {section.filterOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           ) : (
             <div className="flex items-end">
@@ -1870,8 +2233,9 @@ export default function App() {
                   setSearchBySection((prev) => ({ ...prev, [sectionName]: '' }));
                   setFilterBySection((prev) => ({ ...prev, [sectionName]: 'TODOS' }));
                 }}
-                className={`${secondaryButtonClass} w-full`}
+                className={`${secondaryButtonClass} w-full flex items-center justify-center gap-2`}
               >
+                <RefreshCw className="w-4 h-4" />
                 Limpiar filtros
               </button>
             </div>
@@ -1880,24 +2244,24 @@ export default function App() {
 
         {renderFormularios(sectionName)}
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-premium overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-slate-200 text-sm text-slate-500">
+                <tr className="border-b border-slate-100 text-xs font-bold uppercase tracking-widest text-slate-400">
                   {section.columns.map((column) => (
-                    <th key={column} className="pb-3">
+                    <th key={column} className="pb-5 px-4">
                       {column}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-50">
                 {section.rows.length > 0 ? (
                   section.rows.map((row, index) => (
-                    <tr key={index} className="border-b border-slate-100 last:border-0">
+                    <tr key={index} className="group transition-soft hover:bg-slate-50/50">
                       {row.map((cell, cellIndex) => (
-                        <td key={cellIndex} className="py-4 text-slate-700">
+                        <td key={cellIndex} className="py-5 px-4 text-sm font-medium text-slate-700">
                           {cell ?? ''}
                         </td>
                       ))}
@@ -1905,8 +2269,11 @@ export default function App() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={section.columns.length} className="py-6 text-center text-slate-500">
-                      No hay resultados para los filtros aplicados.
+                    <td colSpan={section.columns.length} className="py-12 text-center">
+                      <div className="flex flex-col items-center justify-center text-slate-400">
+                        <Search className="w-12 h-12 mb-4 opacity-20" />
+                        <p className="font-medium">No se encontraron resultados.</p>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -1919,19 +2286,37 @@ export default function App() {
   }
 
   function renderApp() {
+    const iconMap = {
+      'Dashboard': <LayoutDashboard className="w-5 h-5" />,
+      'Órdenes de servicio': <ClipboardList className="w-5 h-5" />,
+      'Visitas técnicas': <MapPin className="w-5 h-5" />,
+      'Mantenimientos': <Wrench className="w-5 h-5" />,
+      'Equipos': <Settings className="w-5 h-5" />,
+      'Clientes': <Building2 className="w-5 h-5" />,
+      'Técnicos': <Users className="w-5 h-5" />,
+      'Reportes': <FileText className="w-5 h-5" />,
+      'Sedes': <Globe className="w-5 h-5" />,
+      'Coordinadores': <ShieldCheck className="w-5 h-5" />,
+    };
+
     return (
-      <div className="min-h-screen bg-slate-100 text-slate-800">
+      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
         <div className="flex min-h-screen">
-          <aside className="flex w-72 flex-col justify-between bg-slate-900 p-6 text-white shadow-2xl">
+          <aside className="fixed inset-y-0 flex w-72 flex-col justify-between bg-slate-900 p-6 text-white shadow-premium-xl z-30">
             <div>
-              <div className="mb-10">
-                <h1 className="text-3xl font-bold tracking-wide">ZION</h1>
-                <p className="mt-2 text-sm text-slate-300">
-                  Gestión de servicio técnico industrial
-                </p>
+              <div className="mb-10 flex items-center gap-3 px-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-premium">
+                  <span className="text-xl font-bold italic text-white">Z</span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight text-white font-display">ZION</h1>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">
+                    Industrial Management
+                  </p>
+                </div>
               </div>
 
-              <nav className="space-y-2">
+              <nav className="space-y-1">
                 {menu.map((item) => (
                   <button
                     key={item}
@@ -1939,34 +2324,46 @@ export default function App() {
                       setActiveSection(item);
                       limpiarMensajes();
                     }}
-                    className={`w-full rounded-2xl px-4 py-3 text-left transition ${
-                      item === activeSection
-                        ? 'bg-white font-semibold text-slate-900 shadow'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    }`}
+                    className={`group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-soft ${item === activeSection
+                      ? 'bg-blue-500 text-white shadow-premium'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                      }`}
                   >
-                    {item}
+                    <span className={`transition-soft ${item === activeSection ? 'text-white' : 'group-hover:text-blue-400'}`}>
+                      {iconMap[item] || <ChevronRight className="w-5 h-5" />}
+                    </span>
+                    <span className="font-semibold text-sm">{item}</span>
                   </button>
                 ))}
               </nav>
             </div>
 
-            <div className="rounded-2xl bg-slate-800 p-4 text-sm text-slate-300">
-              <p className="font-semibold text-white">Usuario conectado</p>
-              <p className="mt-1">Administrador técnico</p>
+            <div className="rounded-3xl bg-slate-800/50 p-5 ring-1 ring-white/10 backdrop-blur-sm">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-slate-700 border-2 border-slate-600 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white font-display">Admin Zion</p>
+                  <p className="text-[10px] text-slate-400 uppercase font-bold">ACTIVO</p>
+                </div>
+              </div>
               <button
                 onClick={handleLogout}
-                className="mt-4 w-full rounded-xl border border-slate-600 px-3 py-2 text-left transition hover:bg-slate-700"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-700/50 py-2.5 text-sm font-bold text-slate-300 transition-soft hover:bg-rose-500/10 hover:text-rose-400 border border-slate-600/50"
               >
+                <LogOut className="w-4 h-4" />
                 Cerrar sesión
               </button>
             </div>
           </aside>
 
-          <main className="flex-1 p-8">
-            {activeSection === 'Dashboard'
-              ? renderDashboard()
-              : renderSection(activeSection)}
+          <main className="flex-1 ml-72 p-10 bg-slate-50">
+            <div className="max-w-7xl mx-auto">
+              {activeSection === 'Dashboard'
+                ? renderDashboard()
+                : renderSection(activeSection)}
+            </div>
           </main>
         </div>
 
@@ -2128,18 +2525,18 @@ export default function App() {
 
 function TarjetaDato({ titulo, valor }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm text-slate-500">{titulo}</p>
-      <p className="mt-2 text-lg font-semibold text-slate-900">{valor}</p>
+    <div className="rounded-[2rem] border border-slate-100 bg-white p-6 shadow-premium transition-soft hover:shadow-premium-xl">
+      <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2 font-display">{titulo}</p>
+      <p className="text-xl font-bold text-slate-900 font-display">{valor}</p>
     </div>
   );
 }
 
 function ResumenItem({ titulo, valor }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-4">
-      <p className="text-sm text-slate-500">{titulo}</p>
-      <p className="mt-1 font-semibold text-slate-900">{valor}</p>
+    <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-4 border border-slate-100 group transition-soft hover:bg-blue-50 hover:border-blue-100">
+      <p className="text-sm font-semibold text-slate-500 group-hover:text-blue-600 transition-soft">{titulo}</p>
+      <p className="text-lg font-bold text-slate-900 group-hover:text-blue-700 transition-soft tabular-nums">{valor}</p>
     </div>
   );
 }
@@ -2223,11 +2620,11 @@ function renderEstadoBadge(estado) {
 function renderTipoBadge(tipo) {
   const esPreventivo = tipo === 'PREVENTIVO';
   const clases = esPreventivo
-    ? 'bg-blue-100 text-blue-700'
-    : 'bg-amber-100 text-amber-700';
+    ? 'bg-blue-50 text-blue-600 border-blue-100 ring-blue-500/5'
+    : 'bg-amber-50 text-amber-600 border-amber-100 ring-amber-500/5';
 
   return (
-    <span className={`rounded-full px-3 py-1 text-sm font-medium ${clases}`}>
+    <span className={`rounded-full border px-3 py-1 text-xs font-bold ring-4 ${clases}`}>
       {tipo || 'Sin tipo'}
     </span>
   );
@@ -2290,30 +2687,30 @@ function renderAccionOrden(orden, onCambiarEstado, onVerDetalle) {
 function getEstadoClasses(estado) {
   switch (estado) {
     case 'PROGRAMADA':
-      return 'bg-sky-100 text-sky-700';
+      return 'bg-blue-50 text-blue-600 border border-blue-100 ring-4 ring-blue-500/5';
     case 'EN_PROCESO':
-      return 'bg-amber-100 text-amber-700';
+      return 'bg-amber-50 text-amber-600 border border-amber-100 ring-4 ring-amber-500/5';
     case 'FINALIZADA':
-      return 'bg-emerald-100 text-emerald-700';
+      return 'bg-emerald-50 text-emerald-600 border border-emerald-100 ring-4 ring-emerald-500/5';
     case 'ACTIVO':
-      return 'bg-emerald-100 text-emerald-700';
+      return 'bg-emerald-50 text-emerald-600 border border-emerald-100 ring-4 ring-emerald-500/5';
     case 'INACTIVO':
-      return 'bg-rose-100 text-rose-700';
+      return 'bg-rose-50 text-rose-600 border border-rose-100 ring-4 ring-rose-500/5';
     case 'MANTENIMIENTO':
-      return 'bg-violet-100 text-violet-700';
+      return 'bg-violet-50 text-violet-600 border border-violet-100 ring-4 ring-violet-500/5';
     default:
-      return 'bg-slate-100 text-slate-700';
+      return 'bg-slate-50 text-slate-600 border border-slate-100';
   }
 }
 
 const inputClass =
-  'w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500';
+  'w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 outline-none transition-soft focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-500/5 font-sans';
 
 const primaryButtonClass =
-  'rounded-2xl bg-slate-900 px-5 py-3 text-white shadow transition hover:-translate-y-0.5 hover:bg-slate-800';
+  'rounded-2xl bg-slate-900 px-6 py-3 text-white shadow-premium transition-soft hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-premium-xl active:translate-y-0 font-display font-semibold';
 
 const secondaryButtonClass =
-  'rounded-2xl border border-slate-300 px-5 py-3 text-slate-700 transition hover:bg-slate-100';
+  'rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition-soft hover:bg-slate-50 hover:border-slate-300 active:scale-95 font-display';
 
 const smallDarkButtonClass =
-  'rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow transition hover:-translate-y-0.5 hover:bg-slate-800';
+  'inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-premium transition-soft hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-premium-xl active:translate-y-0 font-display';
