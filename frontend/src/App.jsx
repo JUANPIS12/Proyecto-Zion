@@ -1,23 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
-import { 
-  LayoutDashboard, 
-  ClipboardList, 
-  MapPin, 
-  Wrench, 
-  Settings, 
-  Users, 
-  Building2, 
-  FileText, 
-  LogOut, 
-  Plus, 
-  Search, 
+import {
+  LayoutDashboard,
+  ClipboardList,
+  MapPin,
+  Wrench,
+  Settings,
+  Users,
+  Building2,
+  FileText,
+  LogOut,
+  Plus,
+  Search,
   Filter,
   RefreshCw,
   Eye,
   CheckCircle2,
   Clock,
   AlertCircle,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck,
+  Globe
 } from 'lucide-react';
 
 
@@ -38,6 +40,9 @@ export default function App() {
   const [mostrarFormularioOrden, setMostrarFormularioOrden] = useState(false);
   const [mostrarFormularioVisita, setMostrarFormularioVisita] = useState(false);
   const [mostrarFormularioMantenimiento, setMostrarFormularioMantenimiento] = useState(false);
+  const [mostrarFormularioSede, setMostrarFormularioSede] = useState(false);
+  const [mostrarFormularioCoordinador, setMostrarFormularioCoordinador] = useState(false);
+
 
   const [ordenes, setOrdenes] = useState([]);
   const [tecnicos, setTecnicos] = useState([]);
@@ -47,6 +52,7 @@ export default function App() {
   const [tecnologias, setTecnologias] = useState([]);
   const [visitas, setVisitas] = useState([]);
   const [mantenimientos, setMantenimientos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -74,6 +80,8 @@ export default function App() {
     Clientes: 'TODOS',
     Técnicos: 'TODOS',
     Reportes: 'TODOS',
+    Sedes: 'TODOS',
+    Coordinadores: 'TODOS',
   });
 
   const [nuevoTecnico, setNuevoTecnico] = useState({
@@ -136,16 +144,35 @@ export default function App() {
     equipoId: '',
   });
 
-  const menu = [
-    'Dashboard',
-    'Órdenes de servicio',
-    'Visitas técnicas',
-    'Mantenimientos',
-    'Equipos',
-    'Clientes',
-    'Técnicos',
-    'Reportes',
-  ];
+  const [nuevaSede, setNuevaSede] = useState({
+    nombre: '',
+    ciudad: '',
+    direccion: '',
+  });
+
+  const [nuevoCoordinador, setNuevoCoordinador] = useState({
+    username: '',
+    password: '',
+  });
+
+  const menu = useMemo(() => {
+    const defaultMenu = [
+      'Dashboard',
+      'Órdenes de servicio',
+      'Visitas técnicas',
+      'Mantenimientos',
+      'Equipos',
+      'Clientes',
+      'Técnicos',
+      'Reportes'
+    ];
+
+    if (rolUsuario === 'ROLE_ADMIN') {
+      return [...defaultMenu, 'Sedes', 'Coordinadores'];
+    }
+
+    return defaultMenu;
+  }, [rolUsuario]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -238,10 +265,48 @@ export default function App() {
       setTecnologias(tecnologiasData);
       setVisitas(visitasData);
       setMantenimientos(mantenimientosData);
+
+      if (rolUsuario === 'ROLE_ADMIN') {
+        const usuariosData = await fetchJson(`${API_URL.replace('/api', '')}/admin/usuarios`);
+        setUsuarios(usuariosData);
+      }
     } catch (err) {
       setError(err.message || 'Error cargando datos');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function crearSede(e) {
+    e.preventDefault();
+    try {
+      limpiarMensajes();
+      await postJson(`${API_URL}/sedes`, nuevaSede);
+      setSuccess('Sede creada correctamente.');
+      setNuevaSede({ nombre: '', ciudad: '', direccion: '' });
+      setMostrarFormularioSede(false);
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo crear la sede');
+    }
+  }
+
+  async function crearCoordinador(e) {
+    e.preventDefault();
+    try {
+      limpiarMensajes();
+      const payload = {
+        username: nuevoCoordinador.username,
+        password: nuevoCoordinador.password,
+        rol: 'ROLE_COORDINADOR',
+      };
+      await postJson(`${API_URL.replace('/api', '')}/admin/usuarios`, payload);
+      setSuccess('Coordinador creado correctamente.');
+      setNuevoCoordinador({ username: '', password: '' });
+      setMostrarFormularioCoordinador(false);
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo crear el coordinador');
     }
   }
 
@@ -640,15 +705,25 @@ export default function App() {
 
     const ordenesFinalizadas = ordenes.filter((o) => o.estado === 'FINALIZADA').length;
 
-    return [
+    const baseStats = [
       { title: 'Órdenes abiertas', value: String(ordenesAbiertas) },
       { title: 'Órdenes finalizadas', value: String(ordenesFinalizadas) },
       { title: 'Técnicos activos', value: String(tecnicos.length) },
-      { title: 'Visitas registradas', value: String(visitas.length) },
+      { title: 'Visitas técnicas', value: String(visitas.length) },
       { title: 'Mantenimientos', value: String(mantenimientos.length) },
       { title: 'Equipos registrados', value: String(equipos.length) },
     ];
-  }, [ordenes, tecnicos, visitas, mantenimientos, equipos]);
+
+    if (rolUsuario === 'ROLE_ADMIN') {
+      return [
+        ...baseStats,
+        { title: 'Sedes registradas', value: String(sedes.length) },
+        { title: 'Coordinadores', value: String(usuarios.filter(u => u.rol === 'ROLE_COORDINADOR').length) },
+      ];
+    }
+
+    return baseStats;
+  }, [ordenes, tecnicos, visitas, mantenimientos, equipos, sedes, usuarios, rolUsuario]);
 
   const recentOrders = useMemo(() => {
     return ordenes.slice(0, 5).map((orden) => ({
@@ -736,6 +811,30 @@ export default function App() {
     [tecnicos, sedesMap]
   );
 
+  const sedesView = useMemo(
+    () =>
+      sedes.map((s) => ({
+        id: s.id,
+        nombre: s.nombre,
+        ciudad: s.ciudad || 'Sin dato',
+        direccion: s.direccion || 'Sin dato',
+      })),
+    [sedes]
+  );
+
+  const coordinadoresView = useMemo(
+    () =>
+      usuarios
+        .filter((u) => u.rol === 'ROLE_COORDINADOR')
+        .map((u) => ({
+          id: u.id,
+          username: u.username,
+          rol: u.rol,
+          activo: u.activo ? 'Sí' : 'No',
+        })),
+    [usuarios]
+  );
+
   const reportesView = useMemo(
     () => [
       { modulo: 'Órdenes', cantidad: ordenes.length },
@@ -789,6 +888,8 @@ export default function App() {
   const filteredClientes = getFilteredRows('Clientes', clientesView);
   const filteredTecnicos = getFilteredRows('Técnicos', tecnicosView);
   const filteredReportes = getFilteredRows('Reportes', reportesView);
+  const filteredSedes = getFilteredRows('Sedes', sedesView);
+  const filteredCoordinadores = getFilteredRows('Coordinadores', coordinadoresView);
 
   const sectionData = {
     'Órdenes de servicio': {
@@ -902,16 +1003,41 @@ export default function App() {
       columns: ['Módulo', 'Cantidad'],
       rows: filteredReportes.map((r) => [r.modulo, r.cantidad]),
     },
+    Sedes: {
+      title: 'Gestión de Sedes',
+      description: 'Control centralizado de ubicaciones físicas y bases operativas.',
+      buttonText: 'Registrar sede',
+      searchPlaceholder: 'Buscar por nombre o ciudad...',
+      filterOptions: ['TODOS'],
+      filterLabel: '',
+      columns: ['ID', 'Nombre', 'Ciudad', 'Dirección'],
+      rows: filteredSedes.map((s) => [s.id, s.nombre, s.ciudad, s.direccion]),
+    },
+    Coordinadores: {
+      title: 'Coordinadores del Sistema',
+      description: 'Administración de accesos y perfiles de coordinación regional.',
+      buttonText: 'Crear coordinador',
+      searchPlaceholder: 'Buscar por usuario...',
+      filterOptions: ['TODOS'],
+      filterLabel: '',
+      columns: ['ID', 'Usuario', 'Rol', 'Estado'],
+      rows: filteredCoordinadores.map((c) => [
+        c.id,
+        c.username,
+        <span className="font-bold text-slate-400">{c.rol}</span>,
+        renderEstadoBadge(c.activo === 'Sí' ? 'ACTIVO' : 'INACTIVO')
+      ]),
+    },
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return;
-    
+
     try {
       setLoading(true);
       setError('');
-      
+
       console.log(">>> [FRONTEND] Iniciando petición de login a: http://localhost:8080/auth/login");
       const res = await fetch('http://localhost:8080/auth/login', {
         method: 'POST',
@@ -919,18 +1045,18 @@ export default function App() {
         body: JSON.stringify({ username, password })
       });
       console.log(">>> [FRONTEND] Respuesta del servidor: ", res.status);
-      
+
       if (!res.ok) {
-         throw new Error('Usuario o contraseña incorrectos');
+        throw new Error('Usuario o contraseña incorrectos');
       }
-      
+
       const data = await res.json();
       console.log(">>> [FRONTEND] Token y Rol recibidos: ", data.rol);
       setToken(data.token);
       setRolUsuario(data.rol);
       setPuedeCrearAdmin(data.puedeCrearAdmin);
       setIsLoggedIn(true);
-      
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('rol', data.rol);
       localStorage.setItem('puedeCrearAdmin', data.puedeCrearAdmin);
@@ -986,11 +1112,18 @@ export default function App() {
                 className="group relative rounded-[2.5rem] border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl transition-soft hover:border-white/20"
               >
                 <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-                
+
                 <h2 className="text-3xl font-bold font-display tracking-tight text-white">Iniciar sesión</h2>
-                <p className="mt-2 text-sm text-slate-400 font-medium mb-10">
+                <p className="mt-2 text-sm text-slate-400 font-medium mb-8">
                   Ingresa tus credenciales para acceder al panel administrativo.
                 </p>
+
+                {error && (
+                  <div className="mb-6 flex items-center gap-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm font-semibold text-rose-400 animate-shake">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
 
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -1043,7 +1176,7 @@ export default function App() {
             {/* Background elements */}
             <div className="absolute top-0 right-0 w-[80%] h-[80%] bg-blue-600/20 blur-[120px] rounded-full -mr-40 -mt-40"></div>
             <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-indigo-600/10 blur-[100px] rounded-full -ml-20 -mb-20"></div>
-            
+
             <div className="relative w-full max-w-xl">
               <div className="rounded-[2.5rem] border border-white/10 bg-slate-950/40 p-10 shadow-2xl backdrop-blur-2xl ring-1 ring-white/10">
                 <div className="mb-10 flex items-center justify-between">
@@ -1124,15 +1257,18 @@ export default function App() {
         {renderMensajes()}
 
         <section className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {stats.map((stat, idx) => {
-            const icons = [
-              <ClipboardList className="w-6 h-6 text-blue-500" />,
-              <CheckCircle2 className="w-6 h-6 text-emerald-500" />,
-              <Users className="w-6 h-6 text-indigo-500" />,
-              <MapPin className="w-6 h-6 text-rose-500" />,
-              <Wrench className="w-6 h-6 text-amber-500" />,
-              <Settings className="w-6 h-6 text-slate-500" />
-            ];
+          {stats.map((stat) => {
+            const iconMapStats = {
+              'Órdenes abiertas': <ClipboardList className="w-6 h-6 text-blue-500" />,
+              'Órdenes finalizadas': <CheckCircle2 className="w-6 h-6 text-emerald-500" />,
+              'Técnicos activos': <Users className="w-6 h-6 text-indigo-500" />,
+              'Visitas técnicas': <MapPin className="w-6 h-6 text-rose-500" />,
+              'Mantenimientos': <Wrench className="w-6 h-6 text-amber-500" />,
+              'Equipos registrados': <Settings className="w-6 h-6 text-slate-500" />,
+              'Sedes registradas': <Globe className="w-6 h-6 text-blue-400" />,
+              'Coordinadores': <ShieldCheck className="w-6 h-6 text-indigo-400" />,
+            };
+
             return (
               <div
                 key={stat.title}
@@ -1140,7 +1276,7 @@ export default function App() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-100 group-hover:bg-blue-50 group-hover:ring-blue-100 transition-soft">
-                    {icons[idx] || <LayoutDashboard className="w-6 h-6" />}
+                    {iconMapStats[stat.title] || <LayoutDashboard className="w-6 h-6" />}
                   </div>
                   <div className="h-1.5 w-1.5 rounded-full bg-slate-300 group-hover:bg-blue-400 group-hover:animate-pulse transition-soft"></div>
                 </div>
@@ -1201,6 +1337,11 @@ export default function App() {
               <ResumenItem titulo="Equipos registrados" valor={equipos.length} />
               <ResumenItem titulo="Visitas registradas" valor={visitas.length} />
               <ResumenItem titulo="Mantenimientos" valor={mantenimientos.length} />
+              <ResumenItem titulo="Sedes activas" valor={sedes.length} />
+              <ResumenItem
+                titulo="Coordinadores"
+                valor={usuarios.filter(u => u.rol === 'ROLE_COORDINADOR').length}
+              />
             </div>
           </div>
         </section>
@@ -1210,25 +1351,28 @@ export default function App() {
 
   function renderMensajes() {
     return (
-      <>
+      <div className="space-y-4 mb-8">
         {loading && (
-          <div className="mb-4 rounded-2xl bg-blue-50 px-4 py-3 text-blue-700">
-            Cargando datos...
+          <div className="flex items-center gap-3 rounded-2xl bg-blue-50/50 border border-blue-100 px-5 py-4 text-blue-700 font-medium animate-pulse">
+            <RefreshCw className="w-5 h-5 animate-spin text-blue-500" />
+            Cargando información del sistema...
           </div>
         )}
 
         {error && (
-          <div className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-red-700">
+          <div className="flex items-center gap-3 rounded-2xl bg-rose-50 border border-rose-100 px-5 py-4 text-rose-700 font-semibold shadow-sm">
+            <AlertCircle className="w-5 h-5 text-rose-500" />
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-emerald-700">
+          <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 border border-emerald-100 px-5 py-4 text-emerald-700 font-semibold shadow-sm">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
             {success}
           </div>
         )}
-      </>
+      </div>
     );
   }
 
@@ -1838,6 +1982,135 @@ export default function App() {
       );
     }
 
+    if (sectionName === 'Sedes' && mostrarFormularioSede) {
+      return (
+        <form
+          onSubmit={crearSede}
+          className="group relative mb-8 grid grid-cols-1 gap-6 rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-premium transition-soft hover:shadow-premium-xl md:grid-cols-2"
+        >
+          <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
+
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-bold font-display text-slate-900 border-l-4 border-blue-500 pl-4">Registro de Nueva Sede</h3>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Nombre</label>
+            <div className="relative">
+              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Ej. Sede Norte Principal"
+                value={nuevaSede.nombre}
+                onChange={(e) => setNuevaSede({ ...nuevaSede, nombre: e.target.value })}
+                className={`${inputClass} pl-12`}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Ciudad</label>
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Ej. Bogotá"
+                value={nuevaSede.ciudad}
+                onChange={(e) => setNuevaSede({ ...nuevaSede, ciudad: e.target.value })}
+                className={`${inputClass} pl-12`}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Dirección Exacta</label>
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Calle 123 # 45 - 67"
+                value={nuevaSede.direccion}
+                onChange={(e) => setNuevaSede({ ...nuevaSede, direccion: e.target.value })}
+                className={`${inputClass} pl-12`}
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2 flex gap-3 pt-4">
+            <button type="submit" className={primaryButtonClass}>
+              Guardar sede
+            </button>
+            <button
+              type="button"
+              onClick={() => setMostrarFormularioSede(false)}
+              className={secondaryButtonClass}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      );
+    }
+
+    if (sectionName === 'Coordinadores' && mostrarFormularioCoordinador) {
+      return (
+        <form
+          onSubmit={crearCoordinador}
+          className="group relative mb-8 grid grid-cols-1 gap-6 rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-premium transition-soft hover:shadow-premium-xl md:grid-cols-2"
+        >
+          <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
+
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-bold font-display text-slate-900 border-l-4 border-indigo-500 pl-4">Alta de Coordinador</h3>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Usuario</label>
+            <div className="relative">
+              <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="ej_coordinador"
+                value={nuevoCoordinador.username}
+                onChange={(e) => setNuevoCoordinador({ ...nuevoCoordinador, username: e.target.value })}
+                className={`${inputClass} pl-12`}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Contraseña segura</label>
+            <div className="relative">
+              <Settings className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={nuevoCoordinador.password}
+                onChange={(e) => setNuevoCoordinador({ ...nuevoCoordinador, password: e.target.value })}
+                className={`${inputClass} pl-12`}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="md:col-span-2 flex gap-3 pt-4">
+            <button type="submit" className={primaryButtonClass}>
+              Guardar coordinador
+            </button>
+            <button
+              type="button"
+              onClick={() => setMostrarFormularioCoordinador(false)}
+              className={secondaryButtonClass}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      );
+    }
+
     return null;
   }
 
@@ -1871,6 +2144,16 @@ export default function App() {
 
     if (sectionName === 'Mantenimientos') {
       setMostrarFormularioMantenimiento(!mostrarFormularioMantenimiento);
+      return;
+    }
+
+    if (sectionName === 'Sedes') {
+      setMostrarFormularioSede(!mostrarFormularioSede);
+      return;
+    }
+
+    if (sectionName === 'Coordinadores') {
+      setMostrarFormularioCoordinador(!mostrarFormularioCoordinador);
     }
   }
 
@@ -2012,6 +2295,8 @@ export default function App() {
       'Clientes': <Building2 className="w-5 h-5" />,
       'Técnicos': <Users className="w-5 h-5" />,
       'Reportes': <FileText className="w-5 h-5" />,
+      'Sedes': <Globe className="w-5 h-5" />,
+      'Coordinadores': <ShieldCheck className="w-5 h-5" />,
     };
 
     return (
@@ -2039,11 +2324,10 @@ export default function App() {
                       setActiveSection(item);
                       limpiarMensajes();
                     }}
-                    className={`group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-soft ${
-                      item === activeSection
-                        ? 'bg-blue-500 text-white shadow-premium'
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                    }`}
+                    className={`group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-soft ${item === activeSection
+                      ? 'bg-blue-500 text-white shadow-premium'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                      }`}
                   >
                     <span className={`transition-soft ${item === activeSection ? 'text-white' : 'group-hover:text-blue-400'}`}>
                       {iconMap[item] || <ChevronRight className="w-5 h-5" />}

@@ -85,9 +85,11 @@ public class AuthController {
         }
 
         // Validar rol permitido
-        if (!request.getRol().equals("ROLE_ADMIN") && !request.getRol().equals("ROLE_TECNICO")) {
+        if (!request.getRol().equals("ROLE_ADMIN") && 
+            !request.getRol().equals("ROLE_TECNICO") && 
+            !request.getRol().equals("ROLE_COORDINADOR")) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Rol inválido. Use ROLE_ADMIN o ROLE_TECNICO"));
+                    .body(Map.of("error", "Rol inválido. Use ROLE_ADMIN, ROLE_COORDINADOR o ROLE_TECNICO"));
         }
 
         // Si se quiere crear un ROLE_ADMIN, verificar que el admin actual tenga el permiso especial
