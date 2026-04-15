@@ -42,7 +42,7 @@ export default function App() {
   const [mostrarFormularioMantenimiento, setMostrarFormularioMantenimiento] = useState(false);
   const [mostrarFormularioSede, setMostrarFormularioSede] = useState(false);
   const [mostrarFormularioCoordinador, setMostrarFormularioCoordinador] = useState(false);
-
+  const [mostrarFormularioTecnologia, setMostrarFormularioTecnologia] = useState(false);
 
   const [ordenes, setOrdenes] = useState([]);
   const [tecnicos, setTecnicos] = useState([]);
@@ -54,6 +54,10 @@ export default function App() {
   const [mantenimientos, setMantenimientos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
 
+  const [nuevaTecnologia, setNuevaTecnologia] = useState({
+    nombre: '',
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -61,6 +65,8 @@ export default function App() {
   const [detalleOrden, setDetalleOrden] = useState(null);
   const [cargandoDetalleOrden, setCargandoDetalleOrden] = useState(false);
   const [mostrarModalDetalleOrden, setMostrarModalDetalleOrden] = useState(false);
+  const [mostrarFormularioEdicionTecnico, setMostrarFormularioEdicionTecnico] = useState(false);
+  const [tecnicoAEditar, setTecnicoAEditar] = useState(null);
 
   const [searchBySection, setSearchBySection] = useState({
     'Órdenes de servicio': '',
@@ -82,6 +88,7 @@ export default function App() {
     Reportes: 'TODOS',
     Sedes: 'TODOS',
     Coordinadores: 'TODOS',
+    Tecnologías: 'TODOS',
   });
 
   const [nuevoTecnico, setNuevoTecnico] = useState({
@@ -91,6 +98,8 @@ export default function App() {
     email: '',
     sedeId: '',
     tecnologiaIds: [],
+    username: '',
+    password: '',
   });
 
   const [nuevoCliente, setNuevoCliente] = useState({
@@ -164,6 +173,7 @@ export default function App() {
       'Equipos',
       'Clientes',
       'Técnicos',
+      'Tecnologías',
       'Reportes'
     ];
 
@@ -230,6 +240,21 @@ export default function App() {
     }
 
     return res.json();
+  }
+
+  async function deleteJson(url) {
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || `Error al eliminar en ${url}`);
+    }
   }
 
   async function cargarDatos() {
@@ -307,6 +332,32 @@ export default function App() {
       await cargarDatos();
     } catch (err) {
       setError(err.message || 'No se pudo crear el coordinador');
+    }
+  }
+
+  async function crearTecnologia(e) {
+    e.preventDefault();
+    try {
+      limpiarMensajes();
+      await postJson(`${API_URL}/tecnologias`, nuevaTecnologia);
+      setSuccess('Tecnología creada correctamente.');
+      setNuevaTecnologia({ nombre: '' });
+      setMostrarFormularioTecnologia(false);
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo crear la tecnología');
+    }
+  }
+
+  async function eliminarTecnologia(id) {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta tecnología?')) return;
+    try {
+      limpiarMensajes();
+      await deleteJson(`${API_URL}/tecnologias/${id}`);
+      setSuccess('Tecnología eliminada correctamente.');
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo eliminar la tecnología');
     }
   }
 
@@ -391,7 +442,22 @@ export default function App() {
 
       await postJson(`${API_URL}/tecnicos`, payload);
 
-      setSuccess('Técnico creado correctamente.');
+      // --- CREACIÓN AUTOMÁTICA DE USUARIO ---
+      const userPayload = {
+        username: nuevoTecnico.username,
+        password: nuevoTecnico.password,
+        rol: 'ROLE_TECNICO',
+      };
+      
+      try {
+        await postJson(`${API_URL.replace('/api', '')}/admin/usuarios`, userPayload);
+        setSuccess('Técnico y cuenta de usuario creados correctamente.');
+      } catch (userErr) {
+        console.error("Error creando usuario:", userErr);
+        setSuccess('Técnico creado, pero hubo un error al crear su cuenta de usuario.');
+      }
+      // --------------------------------------
+
       setNuevoTecnico({
         nombre: '',
         documento: '',
@@ -399,12 +465,68 @@ export default function App() {
         email: '',
         sedeId: '',
         tecnologiaIds: [],
+        username: '',
+        password: '',
       });
       setMostrarFormularioTecnico(false);
       await cargarDatos();
     } catch (err) {
       setError(err.message || 'No se pudo crear el técnico');
     }
+  }
+
+  async function actualizarTecnico(e) {
+    e.preventDefault();
+    try {
+      limpiarMensajes();
+      const payload = {
+        nombre: tecnicoAEditar.nombre,
+        documento: tecnicoAEditar.documento,
+        telefono: tecnicoAEditar.telefono,
+        email: tecnicoAEditar.email,
+        sedeId: Number(tecnicoAEditar.sedeId),
+        tecnologiaIds: tecnicoAEditar.tecnologiaIds,
+      };
+
+      await patchJson(`${API_URL}/tecnicos/${tecnicoAEditar.id}`, payload);
+      setSuccess('Técnico actualizado correctamente.');
+      setMostrarFormularioEdicionTecnico(false);
+      setTecnicoAEditar(null);
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo actualizar el técnico');
+    }
+  }
+
+  async function eliminarTecnico(id) {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este técnico? Esta acción no se puede deshacer.')) return;
+    try {
+      limpiarMensajes();
+      await deleteJson(`${API_URL}/tecnicos/${id}`);
+      setSuccess('Técnico eliminado correctamente.');
+      await cargarDatos();
+    } catch (err) {
+      setError(err.message || 'No se pudo eliminar el técnico');
+    }
+  }
+
+  function prepararEdicionTecnico(tecnico) {
+    // Necesitamos el tecnico real del state, no el de la view
+    const techRaw = tecnicos.find(t => t.id === tecnico.id);
+    if (!techRaw) return;
+
+    setTecnicoAEditar({
+      ...techRaw,
+      tecnologiaIds: techRaw.tecnologias?.map(t => {
+        // Asumiendo que techRaw.tecnologias es array de nombres o IDs
+        // Si el backend devuelve nombres, necesitamos buscar los IDs
+        const found = tecnologias.find(tec => tec.nombre === (typeof t === 'string' ? t : t.nombre));
+        return found ? found.id : null;
+      }).filter(id => id !== null) || []
+    });
+    setMostrarFormularioEdicionTecnico(true);
+    setMostrarFormularioTecnico(false);
+    limpiarMensajes();
   }
 
   async function crearCliente(e) {
@@ -805,7 +927,7 @@ export default function App() {
       tecnicos.map((tecnico) => ({
         id: tecnico.id,
         nombre: tecnico.nombre,
-        sede: sedesMap[tecnico.sedeId] || tecnico.sedeId || 'Sin sede',
+        sede: tecnico.sedeNombre || sedesMap[tecnico.sedeId] || 'Sin sede',
         tecnologias: tecnico.tecnologias?.join(', ') || 'Sin tecnologías',
       })),
     [tecnicos, sedesMap]
@@ -985,12 +1107,45 @@ export default function App() {
       searchPlaceholder: 'Buscar por nombre o tecnología...',
       filterOptions: ['TODOS'],
       filterLabel: '',
-      columns: ['ID', 'Nombre', 'Sede', 'Tecnologías'],
+      columns: ['ID', 'Nombre', 'Sede', 'Tecnologías', 'Acciones'],
       rows: filteredTecnicos.map((tecnico) => [
         tecnico.id,
         tecnico.nombre,
         tecnico.sede,
         tecnico.tecnologias,
+        <div className="flex gap-2">
+          <button
+            onClick={() => prepararEdicionTecnico(tecnico)}
+            className="rounded-lg bg-indigo-500/10 px-3 py-1.5 text-xs font-bold text-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+          >
+            Editar
+          </button>
+          <button
+            onClick={() => eliminarTecnico(tecnico.id)}
+            className="rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+          >
+            Borrar
+          </button>
+        </div>
+      ]),
+    },
+    Tecnologías: {
+      title: 'Tecnologías',
+      description: 'Gestión del catálogo de tecnologías y habilidades.',
+      buttonText: 'Nueva tecnología',
+      searchPlaceholder: 'Buscar tecnología...',
+      filterOptions: ['TODOS'],
+      filterLabel: '',
+      columns: ['ID', 'Nombre', 'Acciones'],
+      rows: tecnologias.map((tec) => [
+        tec.id,
+        tec.nombre,
+        <button
+          onClick={() => eliminarTecnologia(tec.id)}
+          className="rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+        >
+          Borrar
+        </button>
       ]),
     },
     Reportes: {
@@ -1377,6 +1532,135 @@ export default function App() {
   }
 
   function renderFormularios(sectionName) {
+    if (sectionName === 'Técnicos' && mostrarFormularioEdicionTecnico && tecnicoAEditar) {
+      return (
+        <form
+          onSubmit={actualizarTecnico}
+          className="mb-8 grid grid-cols-1 gap-6 rounded-[2.5rem] border-2 border-indigo-500/20 bg-indigo-50/10 p-8 shadow-premium md:grid-cols-2 animate-in fade-in slide-in-from-top-4"
+        >
+          <div className="md:col-span-2 flex items-center justify-between mb-2">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900">Editar Técnico: {tecnicoAEditar.nombre}</h3>
+              <p className="text-sm text-slate-500">Actualiza la información y habilidades del técnico</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Nombre Completo</label>
+            <input
+              type="text"
+              placeholder="Nombre completo"
+              value={tecnicoAEditar.nombre}
+              onChange={(e) => setTecnicoAEditar({ ...tecnicoAEditar, nombre: e.target.value })}
+              className={inputClass}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Documento</label>
+            <input
+              type="text"
+              placeholder="Documento"
+              value={tecnicoAEditar.documento || ''}
+              onChange={(e) => setTecnicoAEditar({ ...tecnicoAEditar, documento: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Teléfono</label>
+            <input
+              type="text"
+              placeholder="Teléfono"
+              value={tecnicoAEditar.telefono || ''}
+              onChange={(e) => setTecnicoAEditar({ ...tecnicoAEditar, telefono: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Email</label>
+            <input
+              type="email"
+              placeholder="Email"
+              value={tecnicoAEditar.email || ''}
+              onChange={(e) => setTecnicoAEditar({ ...tecnicoAEditar, email: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Sede Asignada</label>
+            <select
+              value={tecnicoAEditar.sedeId}
+              onChange={(e) => setTecnicoAEditar({ ...tecnicoAEditar, sedeId: e.target.value })}
+              className={inputClass}
+              required
+            >
+              <option value="">Seleccione sede</option>
+              {sedes.map((sede) => (
+                <option key={sede.id} value={sede.id}>
+                  {sede.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <p className="mb-4 font-bold text-slate-900 flex items-center gap-2">
+              <Settings size={16} className="text-indigo-500" />
+              Selecciona Tecnologías (Habilidades)
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {tecnologias.map((tec) => (
+                <label
+                  key={tec.id}
+                  className={`flex items-center gap-3 rounded-2xl border-2 p-4 transition-all cursor-pointer ${
+                    tecnicoAEditar.tecnologiaIds.includes(tec.id)
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm'
+                      : 'border-slate-100 bg-white hover:border-slate-200 text-slate-600'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="h-5 w-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    checked={tecnicoAEditar.tecnologiaIds.includes(tec.id)}
+                    onChange={() => {
+                      const existe = tecnicoAEditar.tecnologiaIds.includes(tec.id);
+                      setTecnicoAEditar({
+                        ...tecnicoAEditar,
+                        tecnologiaIds: existe
+                          ? tecnicoAEditar.tecnologiaIds.filter((id) => id !== tec.id)
+                          : [...tecnicoAEditar.tecnologiaIds, tec.id],
+                      });
+                    }}
+                  />
+                  <span className="font-bold text-sm tracking-tight">{tec.nombre}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="md:col-span-2 flex gap-4 pt-6 mt-4 border-t border-slate-100">
+            <button type="submit" className="flex-1 rounded-2xl bg-indigo-600 px-8 py-4 font-bold text-white shadow-premium transition-soft hover:bg-indigo-700 hover:shadow-indigo-500/25 active:scale-95">
+              Actualizar Técnico
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMostrarFormularioEdicionTecnico(false);
+                setTecnicoAEditar(null);
+              }}
+              className="rounded-2xl bg-slate-100 px-8 py-4 font-bold text-slate-600 transition-soft hover:bg-slate-200 active:scale-95"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      );
+    }
+
     if (sectionName === 'Técnicos' && mostrarFormularioTecnico) {
       return (
         <form
@@ -1429,6 +1713,25 @@ export default function App() {
               </option>
             ))}
           </select>
+
+          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-101 pt-4">
+            <input
+              type="text"
+              placeholder="Usuario para el técnico"
+              value={nuevoTecnico.username}
+              onChange={(e) => setNuevoTecnico({ ...nuevoTecnico, username: e.target.value })}
+              className={inputClass}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={nuevoTecnico.password}
+              onChange={(e) => setNuevoTecnico({ ...nuevoTecnico, password: e.target.value })}
+              className={inputClass}
+              required
+            />
+          </div>
 
           <div className="md:col-span-2">
             <p className="mb-3 font-semibold text-slate-800">Tecnologías</p>
@@ -2111,6 +2414,42 @@ export default function App() {
       );
     }
 
+    if (sectionName === 'Tecnologías' && mostrarFormularioTecnologia) {
+      return (
+        <form
+          onSubmit={crearTecnologia}
+          className="mb-6 grid grid-cols-1 gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2"
+        >
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">
+              Nombre de la Tecnología
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: Mecánica, Electrónica, PLC..."
+              value={nuevaTecnologia.nombre}
+              onChange={(e) => setNuevaTecnologia({ ...nuevaTecnologia, nombre: e.target.value })}
+              className={inputClass}
+              required
+            />
+          </div>
+
+          <div className="md:col-span-2 flex gap-3 pt-4">
+            <button type="submit" className={primaryButtonClass}>
+              Guardar tecnología
+            </button>
+            <button
+              type="button"
+              onClick={() => setMostrarFormularioTecnologia(false)}
+              className={secondaryButtonClass}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      );
+    }
+
     return null;
   }
 
@@ -2154,6 +2493,11 @@ export default function App() {
 
     if (sectionName === 'Coordinadores') {
       setMostrarFormularioCoordinador(!mostrarFormularioCoordinador);
+      return;
+    }
+
+    if (sectionName === 'Tecnologías') {
+      setMostrarFormularioTecnologia(!mostrarFormularioTecnologia);
     }
   }
 
