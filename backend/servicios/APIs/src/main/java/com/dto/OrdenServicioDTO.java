@@ -9,6 +9,9 @@ public record OrdenServicioDTO(
         LocalDateTime fechaProgramada,
         String estado,
         Long sedeId,
+        String sedeNombre,
         Long empresaId,
+        String empresaNombre,
+        String empresaDireccion,
         Long tecnicoId
-) {}
+) {}

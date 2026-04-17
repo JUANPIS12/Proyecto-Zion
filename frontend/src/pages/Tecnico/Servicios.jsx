@@ -70,17 +70,21 @@ export default function TechnicianServices() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-slate-400">
-                  <MapPin size={14} />
+                  <MapPin size={14} className="text-rose-400" />
+                  <span className="text-slate-300 font-medium">{service.empresaDireccion || 'Dirección no disponible'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="w-3.5" /> {/* Espaciador visual */}
                   <span>Sede: {service.sedeNombre || 'Planta Principal'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-400">
-                  <Calendar size={14} />
+                  <Calendar size={14} className="text-indigo-400" />
                   <span>Programado: {new Date(service.fechaProgramada).toLocaleDateString()}</span>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-                <span className="text-xs text-indigo-400 font-medium">Ver detalles</span>
+                <span className="text-xs text-indigo-400 font-medium">Ver detalles e Iniciar</span>
                 <ChevronRight size={18} className="text-slate-600" />
               </div>
             </div>

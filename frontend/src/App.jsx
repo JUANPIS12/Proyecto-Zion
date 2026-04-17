@@ -126,7 +126,6 @@ export default function App() {
   });
 
   const [nuevaOrden, setNuevaOrden] = useState({
-    numeroOrden: '',
     fechaProgramada: '',
     estado: 'PROGRAMADA',
     empresaId: '',
@@ -165,7 +164,7 @@ export default function App() {
   });
 
   const menu = useMemo(() => {
-    const defaultMenu = [
+    let defaultMenu = [
       'Dashboard',
       'Órdenes de servicio',
       'Visitas técnicas',
@@ -177,8 +176,10 @@ export default function App() {
       'Reportes'
     ];
 
-    if (rolUsuario === 'ROLE_ADMIN') {
-      return [...defaultMenu, 'Sedes', 'Coordinadores'];
+    if (rolUsuario === 'ROLE_TECNICO') {
+      defaultMenu = defaultMenu.filter(item => !['Visitas técnicas', 'Clientes', 'Técnicos', 'Tecnologías'].includes(item));
+    } else if (rolUsuario === 'ROLE_ADMIN') {
+      defaultMenu = [...defaultMenu, 'Sedes', 'Coordinadores'];
     }
 
     return defaultMenu;
@@ -612,7 +613,6 @@ export default function App() {
       limpiarMensajes();
 
       const payload = {
-        numeroOrden: nuevaOrden.numeroOrden,
         fechaProgramada: `${nuevaOrden.fechaProgramada}:00`,
         estado: nuevaOrden.estado,
         sedeId: Number(nuevaOrden.sedeId),
@@ -624,7 +624,6 @@ export default function App() {
 
       setSuccess('Orden creada correctamente.');
       setNuevaOrden({
-        numeroOrden: '',
         fechaProgramada: '',
         estado: 'PROGRAMADA',
         empresaId: '',
@@ -1017,7 +1016,7 @@ export default function App() {
     'Órdenes de servicio': {
       title: 'Órdenes de servicio',
       description: 'Gestión de órdenes creadas, en proceso y finalizadas.',
-      buttonText: 'Nueva orden',
+      buttonText: rolUsuario === 'ROLE_TECNICO' ? null : 'Nueva orden',
       searchPlaceholder: 'Buscar por número, empresa o técnico...',
       filterOptions: ['TODOS', 'PROGRAMADA', 'EN_PROCESO', 'FINALIZADA'],
       filterLabel: 'Estado',
@@ -1070,8 +1069,8 @@ export default function App() {
     },
     Equipos: {
       title: 'Equipos',
-      description: 'Inventario y estado operativo de los equipos registrados.',
-      buttonText: 'Nuevo equipo',
+      description: 'Inventario de equipos disponibles e instalados.',
+      buttonText: rolUsuario === 'ROLE_TECNICO' ? null : 'Nuevo equipo',
       searchPlaceholder: 'Buscar por serial, referencia, empresa o tecnología...',
       filterOptions: ['TODOS', 'ACTIVO', 'INACTIVO', 'MANTENIMIENTO'],
       filterLabel: 'Estado',
@@ -1994,15 +1993,6 @@ export default function App() {
           onSubmit={crearOrden}
           className="mb-6 grid grid-cols-1 gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2"
         >
-          <input
-            type="text"
-            placeholder="Número de orden"
-            value={nuevaOrden.numeroOrden}
-            onChange={(e) => setNuevaOrden({ ...nuevaOrden, numeroOrden: e.target.value })}
-            className={inputClass}
-            required
-          />
-
           <input
             type="datetime-local"
             value={nuevaOrden.fechaProgramada}
