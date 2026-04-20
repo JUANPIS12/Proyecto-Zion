@@ -25,6 +25,9 @@ export const DataProvider = ({ children }) => {
   const [cargandoDetalleOrden, setCargandoDetalleOrden] = useState(false);
   const [mostrarModalDetalleOrden, setMostrarModalDetalleOrden] = useState(false);
 
+  const [activeOrderForTechnician, setActiveOrderForTechnician] = useState(null);
+  const [hasInterventionSaved, setHasInterventionSaved] = useState(false);
+
   const clearMessages = () => {
     setErrorData('');
     setSuccessData('');
@@ -49,6 +52,19 @@ export const DataProvider = ({ children }) => {
   const closeDetalleOrden = () => {
     setMostrarModalDetalleOrden(false);
     setDetalleOrden(null);
+  };
+
+  const registrarIntervencion = async (payload) => {
+    try {
+      clearMessages();
+      await apiService.post('/mantenimientos', payload);
+      setHasInterventionSaved(true);
+      setSuccessData('Intervención registrada correctamente. Ya puedes finalizar el servicio.');
+      loadData();
+    } catch (err) {
+      setErrorData(err.message || 'Error al registrar la intervención');
+      throw err;
+    }
   };
 
   const loadData = useCallback(async () => {
@@ -80,6 +96,20 @@ export const DataProvider = ({ children }) => {
       setTecnologias(tecnologiasData);
       setVisitas(visitasData);
       setMantenimientos(mantenimientosData);
+
+      // Check if any order is currently in process by this user (technician)
+      if (user?.rol === 'ROLE_TECNICO') {
+        const myActiveOrder = ordenesData.find(o => o.estado === 'EN_PROCESO');
+        if (myActiveOrder) {
+          setActiveOrderForTechnician(myActiveOrder);
+          // Check if it already has maintenance records
+          const hasMaint = mantenimientosData.some(m => m.ordenServicioId === myActiveOrder.id);
+          setHasInterventionSaved(hasMaint);
+        } else {
+          setActiveOrderForTechnician(null);
+          setHasInterventionSaved(false);
+        }
+      }
 
       if (user?.rol === 'ROLE_ADMIN' || user?.rol === 'admin') {
         const res = await fetch('http://localhost:8080/admin/usuarios', {
@@ -115,7 +145,10 @@ export const DataProvider = ({ children }) => {
     setErrorData, setSuccessData,
     clearMessages, loadData,
     detalleOrden, cargandoDetalleOrden, mostrarModalDetalleOrden, 
-    verDetalleOrden, closeDetalleOrden
+    verDetalleOrden, closeDetalleOrden,
+    activeOrderForTechnician, setActiveOrderForTechnician,
+    hasInterventionSaved, setHasInterventionSaved,
+    registrarIntervencion
   };
 
   return (

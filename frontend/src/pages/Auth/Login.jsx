@@ -139,11 +139,7 @@ export default function Login() {
            <img src="/logo-solo.png" alt="ZION" className="h-20 w-auto" style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.3))' }} />
         </div>
 
-        <div className="w-full max-w-[420px] mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <div className="inline-flex items-center gap-2 rounded-full bg-copper-50 px-3 py-1 text-xs font-bold text-copper-700 mb-8 border border-copper-100 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5" /> Portal Administrativo
-            </div>
-
+        <div className="w-full max-w-105 mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
             <h2 className="text-3xl sm:text-4xl font-black tracking-tighter text-gunmetal-950 font-display mb-2">Bienvenido de nuevo</h2>
             <p className="text-gunmetal-800 font-medium text-[15px] mb-10 opacity-70">
                 Por favor, ingresa tus credenciales corporativas para continuar al panel de control.

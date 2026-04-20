@@ -8,7 +8,8 @@ import { Eye } from 'lucide-react';
 export default function OrdenesList() {
   const { 
     ordenes, empresas, tecnicos, sedes, loadData, 
-    setErrorData, setSuccessData, verDetalleOrden 
+    setErrorData, setSuccessData, verDetalleOrden,
+    setActiveOrderForTechnician, hasInterventionSaved
   } = useData();
   const { user } = useAuth();
   
@@ -73,10 +74,24 @@ export default function OrdenesList() {
     }
   };
 
-  const cambiarEstadoOrden = async (id, nuevoEstado) => {
+  const cambiarEstadoOrden = async (id, nuevoEstado, ordenCompleta) => {
+    if (nuevoEstado === 'FINALIZADA' && user?.rol === 'ROLE_TECNICO' && !hasInterventionSaved) {
+      alert("⚠️ Error: Debes registrar qué hiciste en el equipo usando el panel inferior antes de poder finalizar el servicio.");
+      return;
+    }
+
     try {
       await apiService.patch(`/ordenes/${id}`, { estado: nuevoEstado });
       setSuccessData(`Orden actualizada a estado ${nuevoEstado}.`);
+      
+      if (nuevoEstado === 'EN_PROCESO' && user?.rol === 'ROLE_TECNICO') {
+        setActiveOrderForTechnician(ordenCompleta);
+      }
+      
+      if (nuevoEstado === 'FINALIZADA' && user?.rol === 'ROLE_TECNICO') {
+        setActiveOrderForTechnician(null);
+      }
+
       loadData();
     } catch (err) {
       setErrorData(err.message || 'Error actualizando estado');
@@ -84,6 +99,9 @@ export default function OrdenesList() {
   };
 
   const renderAccionOrden = (orden) => {
+    // Buscar la orden completa original para tener todos los datos
+    const fullOrder = ordenes.find(o => o.id === orden.id);
+
     const btnDetalle = (
       <button
         onClick={() => verDetalleOrden(orden.id)}
@@ -104,13 +122,22 @@ export default function OrdenesList() {
     };
     const siguiente = siguientesEstados[orden.estado];
     
+    // Si es técnico y el estado siguiente es FINALIZADA, validamos el botón
+    const isBlocked = siguiente === 'FINALIZADA' && user?.rol === 'ROLE_TECNICO' && !hasInterventionSaved;
+
     return (
       <div className="flex items-center gap-2">
         {btnDetalle}
         {siguiente && (
           <button
-            onClick={() => cambiarEstadoOrden(orden.id, siguiente)}
-            className="rounded-lg bg-gunmetal-800/10 px-3 py-1.5 text-xs font-bold text-gunmetal-800 border border-gunmetal-800/20 transition-all hover:bg-gunmetal-900 hover:text-white active:scale-95 whitespace-nowrap"
+            onClick={() => cambiarEstadoOrden(orden.id, siguiente, fullOrder)}
+            disabled={isBlocked}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all active:scale-95 whitespace-nowrap
+              ${isBlocked 
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50' 
+                : 'bg-gunmetal-800/10 text-gunmetal-800 border border-gunmetal-800/20 hover:bg-gunmetal-900 hover:text-white'}
+            `}
+            title={isBlocked ? "Debes registrar el mantenimiento antes de finalizar" : ""}
           >
             Mover a {siguiente}
           </button>
