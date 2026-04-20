@@ -119,16 +119,16 @@ export default function DashboardLayout() {
     <div className="flex h-[100dvh] bg-slate-50 text-slate-900 font-sans selection:bg-blue-500/30 overflow-hidden relative">
       
       {/* Mobile Top Bar */}
-      <div className="lg:hidden absolute top-0 left-0 right-0 h-16 bg-slate-950 border-b border-white/10 z-40 flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <span className="text-lg font-bold italic text-white flex items-center justify-center">Z</span>
-          </div>
-          <span className="text-lg font-black tracking-tighter text-white font-display leading-none">ZION</span>
-        </div>
-        <button className="text-white" onClick={() => setMobileMenuOpen(true)}>
+      <div className="lg:hidden absolute top-0 left-0 right-0 h-16 bg-slate-950 border-b border-white/10 z-40 flex items-center justify-between px-5">
+        <button className="text-white hover:text-blue-400 transition-colors" onClick={() => setMobileMenuOpen(true)}>
            <Menu className="w-6 h-6" />
         </button>
+        <div className="flex items-center gap-3">
+          <span className="text-xl font-black tracking-tighter text-white font-display leading-none">ZION</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-premium">
+            <span className="text-lg font-bold italic text-white flex items-center justify-center">Z</span>
+          </div>
+        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
