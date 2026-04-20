@@ -6,7 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="51ea31d8-a028-4fea-822c-a27a2e7e32ff" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/src/components/Layout/DashboardLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/src/components/Layout/DashboardLayout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/src/pages/Auth/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/src/pages/Auth/Login.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
