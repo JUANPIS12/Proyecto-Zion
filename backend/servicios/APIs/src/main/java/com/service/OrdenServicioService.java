@@ -253,12 +253,12 @@ public class OrdenServicioService {
                         m.getTipoContrato(),
                         m.getNovedades(),
                         m.getEstadoFinal(),
-                        m.getEvidencias(),
+                        m.getEvidencias() != null ? new java.util.ArrayList<>(m.getEvidencias()) : null,
                         m.getDescripcion(),
                         m.getFechaInicio(),
                         m.getFechaFin(),
-                        m.getOrdenServicio().getId(),
-                        m.getEquipo().getId()
+                        m.getOrdenServicio() != null ? m.getOrdenServicio().getId() : null,
+                        m.getEquipo() != null ? m.getEquipo().getId() : null
                 );
         }
 }

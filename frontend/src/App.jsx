@@ -19,7 +19,8 @@ import {
   AlertCircle,
   ChevronRight,
   ShieldCheck,
-  Globe
+  Globe,
+  Cpu
 } from 'lucide-react';
 
 
@@ -150,6 +151,11 @@ export default function App() {
     fechaFin: '',
     ordenServicioId: '',
     equipoId: '',
+    condicionInicial: '',
+    tecnologiaAsociada: '',
+    tipoContrato: '',
+    novedades: '',
+    estadoFinal: '',
   });
 
   const [nuevaSede, setNuevaSede] = useState({
@@ -685,6 +691,11 @@ export default function App() {
         fechaFin: `${nuevoMantenimiento.fechaFin}:00`,
         ordenServicioId: Number(nuevoMantenimiento.ordenServicioId),
         equipoId: Number(nuevoMantenimiento.equipoId),
+        condicionInicial: nuevoMantenimiento.condicionInicial || null,
+        tecnologiaAsociada: nuevoMantenimiento.tecnologiaAsociada || null,
+        tipoContrato: nuevoMantenimiento.tipoContrato || null,
+        novedades: nuevoMantenimiento.novedades || null,
+        estadoFinal: nuevoMantenimiento.estadoFinal || null,
       };
 
       await postJson(`${API_URL}/mantenimientos`, payload);
@@ -697,6 +708,11 @@ export default function App() {
         fechaFin: '',
         ordenServicioId: '',
         equipoId: '',
+        condicionInicial: '',
+        tecnologiaAsociada: '',
+        tipoContrato: '',
+        novedades: '',
+        estadoFinal: '',
       });
       setMostrarFormularioMantenimiento(false);
       await cargarDatos();
@@ -893,6 +909,9 @@ export default function App() {
         fechaFin: formatearFecha(m.fechaFin),
         orden: ordenesMap[m.ordenServicioId] || m.ordenServicioId,
         equipo: equiposMap[m.equipoId] || m.equipoId,
+        condicionInicial: m.condicionInicial || 'Sin dato',
+        novedades: m.novedades || 'Sin dato',
+        estadoFinal: m.estadoFinal || 'Sin dato',
       })),
     [mantenimientos, ordenesMap, equiposMap]
   );
@@ -1056,11 +1075,14 @@ export default function App() {
       searchPlaceholder: 'Buscar por tipo, descripción, orden o equipo...',
       filterOptions: ['TODOS', 'PREVENTIVO', 'CORRECTIVO'],
       filterLabel: 'Tipo',
-      columns: ['ID', 'Tipo', 'Descripción', 'Inicio', 'Fin', 'Orden', 'Equipo'],
+      columns: ['ID', 'Tipo', 'Descripción', 'Condición Inicial', 'Novedades', 'Estado Final', 'Inicio', 'Fin', 'Orden', 'Equipo'],
       rows: filteredMantenimientos.map((m) => [
         m.id,
         renderTipoBadge(m.tipo),
         m.descripcion,
+        m.condicionInicial,
+        m.novedades,
+        m.estadoFinal,
         m.fechaInicio,
         m.fechaFin,
         m.orden,
@@ -2259,6 +2281,57 @@ export default function App() {
             rows={3}
           />
 
+          <input
+            type="text"
+            placeholder="Condición Inicial"
+            value={nuevoMantenimiento.condicionInicial}
+            onChange={(e) =>
+              setNuevoMantenimiento({ ...nuevoMantenimiento, condicionInicial: e.target.value })
+            }
+            className={inputClass}
+          />
+
+          <input
+            type="text"
+            placeholder="Tecnología Asociada"
+            value={nuevoMantenimiento.tecnologiaAsociada}
+            onChange={(e) =>
+              setNuevoMantenimiento({ ...nuevoMantenimiento, tecnologiaAsociada: e.target.value })
+            }
+            className={inputClass}
+          />
+
+          <input
+            type="text"
+            placeholder="Tipo de Contrato"
+            value={nuevoMantenimiento.tipoContrato}
+            onChange={(e) =>
+              setNuevoMantenimiento({ ...nuevoMantenimiento, tipoContrato: e.target.value })
+            }
+            className={inputClass}
+          />
+
+          <input
+            type="text"
+            placeholder="Estado Final"
+            value={nuevoMantenimiento.estadoFinal}
+            onChange={(e) =>
+              setNuevoMantenimiento({ ...nuevoMantenimiento, estadoFinal: e.target.value })
+            }
+            className={inputClass}
+          />
+
+          <textarea
+            placeholder="Novedades (Trazabilidad)"
+            value={nuevoMantenimiento.novedades}
+            onChange={(e) =>
+              setNuevoMantenimiento({ ...nuevoMantenimiento, novedades: e.target.value })
+            }
+            className={`${inputClass} md:col-span-2`}
+            rows={2}
+          />
+
+
           <div className="md:col-span-2 flex gap-3">
             <button type="submit" className={primaryButtonClass}>
               Guardar mantenimiento
@@ -2628,6 +2701,7 @@ export default function App() {
       'Equipos': <Settings className="w-5 h-5" />,
       'Clientes': <Building2 className="w-5 h-5" />,
       'Técnicos': <Users className="w-5 h-5" />,
+      'Tecnologías': <Cpu className="w-5 h-5" />,
       'Reportes': <FileText className="w-5 h-5" />,
       'Sedes': <Globe className="w-5 h-5" />,
       'Coordinadores': <ShieldCheck className="w-5 h-5" />,
@@ -2766,6 +2840,9 @@ export default function App() {
                             <th className="pb-3">ID</th>
                             <th className="pb-3">Tipo</th>
                             <th className="pb-3">Descripción</th>
+                            <th className="pb-3">Condición</th>
+                            <th className="pb-3">Novedades</th>
+                            <th className="pb-3">Est. Final</th>
                             <th className="pb-3">Inicio</th>
                             <th className="pb-3">Fin</th>
                           </tr>
@@ -2779,6 +2856,9 @@ export default function App() {
                               <td className="py-4">{mantenimiento?.id || '-'}</td>
                               <td className="py-4">{renderTipoBadge(mantenimiento?.tipo)}</td>
                               <td className="py-4">{mantenimiento?.descripcion || '-'}</td>
+                              <td className="py-4">{mantenimiento?.condicionInicial || '-'}</td>
+                              <td className="py-4">{mantenimiento?.novedades || '-'}</td>
+                              <td className="py-4">{mantenimiento?.estadoFinal || '-'}</td>
                               <td className="py-4">{formatearFecha(mantenimiento?.fechaInicio)}</td>
                               <td className="py-4">{formatearFecha(mantenimiento?.fechaFin)}</td>
                             </tr>
@@ -2786,7 +2866,7 @@ export default function App() {
 
                           {(detalleOrden?.mantenimientos || []).length === 0 && (
                             <tr>
-                              <td colSpan="5" className="py-4 text-slate-500">
+                              <td colSpan="8" className="py-4 text-slate-500">
                                 No hay mantenimientos asociados.
                               </td>
                             </tr>

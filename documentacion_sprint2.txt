@@ -1,0 +1,526 @@
+===============================================================
+ARCHIVO: documentacion_sprint2.txt
+PROYECTO: Sprint #2 – Desarrollo de Software II
+UNIVERSIDAD: Universidad del Valle
+PROGRAMA: Ingeniería de Sistemas
+===============================================================
+
+TABLA DE CONTENIDOS
+───────────────────
+1. Información general del Sprint
+2. Equipo de trabajo
+3. Fase 1 – Historias de usuario implementadas
+4. Fase 2 – Herramientas DevOps utilizadas
+5. Fase 3 – Integración continua y flujo de trabajo
+6. Fase 4 – Seguimiento ágil del Sprint
+7. Fase 5 – Documentación técnica
+8. Retrospectiva del Sprint
+9. Checklist final de entrega
+
+===============================================================
+1. INFORMACIÓN GENERAL DEL SPRINT
+===============================================================
+
+Sprint número    : #2
+Nombre del Sprint: Construcción, Integración y Validación
+Fecha de inicio  : [DD/MM/AAAA]
+Fecha de cierre  : [DD/MM/AAAA]
+Duración         : [X] semanas
+Objetivo principal: Consolidar una versión funcional del sistema Zion, integrando frontend y backend con autenticación, módulos operativos y trazabilidad en repositorio.
+Repositorio      : [URL del repositorio GitHub/GitLab]
+Herramienta ágil : [Jira / Trello / Azure DevOps / otra]
+
+===============================================================
+2. EQUIPO DE TRABAJO
+===============================================================
+
+Integrante 1:
+  Nombre completo : ________________________________
+  Código          : ________________________________
+  Rol en el Sprint: ________________________________
+  Historias asignadas: ____________________________
+
+Integrante 2:
+  Nombre completo : ________________________________
+  Código          : ________________________________
+  Rol en el Sprint: ________________________________
+  Historias asignadas: ____________________________
+
+Integrante 3:
+  Nombre completo : ________________________________
+  Código          : ________________________________
+  Rol en el Sprint: ________________________________
+  Historias asignadas: ____________________________
+
+Integrante 4:
+  Nombre completo : ________________________________
+  Código          : ________________________________
+  Rol en el Sprint: ________________________________
+  Historias asignadas: ____________________________
+
+===============================================================
+3. FASE 1 – HISTORIAS DE USUARIO IMPLEMENTADAS
+===============================================================
+
+HISTORIA DE USUARIO #1
+───────────────────────
+ID en Backlog     : HU-001
+Nombre            : Inicio de sesión seguro
+Descripción       : Como usuario del sistema, quiero autenticarme para acceder según mi rol.
+Story Points      : [Número]
+Responsable       : [Nombre del integrante]
+Rama de desarrollo: feature/login-usuario
+Pull Request      : [URL del PR]
+Estado final      : [Done / In Progress / To Do]
+
+Criterios de Aceptación:
+  ☐ El usuario puede iniciar sesión con credenciales válidas.
+  ☐ Se bloquea acceso con credenciales inválidas.
+  ☐ Se retorna token JWT para sesión autenticada.
+
+Evidencia técnica:
+  - Archivo(s) modificado(s): backend/servicios/APIs/src/main/java/com/controller/AuthController.java
+  - Commits relevantes     : [hash corto – descripción]
+  - Capturas de pantalla   : [Sí / No – ubicación]
+
+────────────────────────────────────────────────────────────
+
+HISTORIA DE USUARIO #2
+───────────────────────
+ID en Backlog     : HU-002
+Nombre            : Gestión de empresas
+Descripción       : Como coordinador, quiero registrar y administrar empresas para mantener el inventario organizado.
+Story Points      : [Número]
+Responsable       : [Nombre del integrante]
+Rama de desarrollo: feature/registro-empresa
+Pull Request      : [URL del PR]
+Estado final      : [Done / In Progress / To Do]
+
+Criterios de Aceptación:
+  ☐ Se puede crear empresa con datos obligatorios validados.
+  ☐ Se puede listar y consultar empresas registradas.
+  ☐ Se puede actualizar información de empresa.
+
+Evidencia técnica:
+  - Archivo(s) modificado(s): backend/servicios/APIs/src/main/java/com/controller/EmpresaController.java
+  - Commits relevantes     : [hash corto – descripción]
+  - Capturas de pantalla   : [Sí / No – ubicación]
+
+────────────────────────────────────────────────────────────
+
+HISTORIA DE USUARIO #3
+───────────────────────
+ID en Backlog     : HU-003
+Nombre            : Gestión de técnicos
+Descripción       : Como coordinador, quiero administrar técnicos para asignar servicios correctamente.
+Story Points      : [Número]
+Responsable       : [Nombre del integrante]
+Rama de desarrollo: feature/gestion-tecnicos
+Pull Request      : [URL del PR]
+Estado final      : [Done / In Progress / To Do]
+
+Criterios de Aceptación:
+  ☐ Se puede crear técnico con validaciones.
+  ☐ Se puede consultar listado de técnicos.
+  ☐ Se puede actualizar información del técnico.
+
+Evidencia técnica:
+  - Archivo(s) modificado(s): backend/servicios/APIs/src/main/java/com/controller/TecnicoController.java
+  - Commits relevantes     : [hash corto – descripción]
+  - Capturas de pantalla   : [Sí / No – ubicación]
+
+────────────────────────────────────────────────────────────
+
+HISTORIA DE USUARIO #4
+───────────────────────
+ID en Backlog     : HU-004
+Nombre            : Gestión de órdenes de servicio
+Descripción       : Como coordinador, quiero crear y consultar órdenes de servicio para controlar la operación técnica.
+Story Points      : [Número]
+Responsable       : [Nombre del integrante]
+Rama de desarrollo: feature/orden-servicio
+Pull Request      : [URL del PR]
+Estado final      : [Done / In Progress / To Do]
+
+Criterios de Aceptación:
+  ☐ Se puede crear una orden de servicio.
+  ☐ Se puede listar y consultar órdenes por estado.
+  ☐ La orden incluye detalle de técnico/equipo cuando aplica.
+
+Evidencia técnica:
+  - Archivo(s) modificado(s): backend/servicios/APIs/src/main/java/com/controller/OrdenServicioController.java
+  - Commits relevantes     : [hash corto – descripción]
+  - Capturas de pantalla   : [Sí / No – ubicación]
+
+────────────────────────────────────────────────────────────
+
+HISTORIA DE USUARIO #5
+───────────────────────
+ID en Backlog     : HU-005
+Nombre            : Atención técnica en frontend
+Descripción       : Como técnico, quiero visualizar y gestionar servicios asignados desde la interfaz para atenderlos oportunamente.
+Story Points      : [Número]
+Responsable       : [Nombre del integrante]
+Rama de desarrollo: feature/atencion-tecnica-ui
+Pull Request      : [URL del PR]
+Estado final      : [Done / In Progress / To Do]
+
+Criterios de Aceptación:
+  ☐ El técnico visualiza servicios asignados.
+  ☐ El técnico accede a flujo de atención (wizard).
+  ☐ El dashboard refleja estado operativo.
+
+Evidencia técnica:
+  - Archivo(s) modificado(s): frontend/src/pages/Tecnico/Servicios.jsx, frontend/src/pages/Tecnico/AtencionWizard.jsx
+  - Commits relevantes     : [hash corto – descripción]
+  - Capturas de pantalla   : [Sí / No – ubicación]
+
+────────────────────────────────────────────────────────────
+
+RESUMEN FASE 1:
+  Total historias planificadas : [X]
+  Total historias completadas  : [X]
+  Story Points planificados    : [X]
+  Story Points completados     : [X]
+  % de completitud             : [X]%
+
+===============================================================
+4. FASE 2 – HERRAMIENTAS DEVOPS UTILIZADAS
+===============================================================
+
+[MARCAR LA SITUACIÓN DEL EQUIPO CON UN ASTERISCO (*)]
+
+  ( * ) CASO A: Se utilizó al menos una herramienta DevOps
+  (   ) CASO B: NO se utilizó ninguna herramienta DevOps
+
+────────────────────────────────────────────────────────────
+CASO A – HERRAMIENTAS UTILIZADAS (completar si aplica)
+────────────────────────────────────────────────────────────
+
+HERRAMIENTA 1: GitHub (Control de versiones + Pull Requests)
+
+  ¿Cuál herramienta se utilizó?
+    Respuesta: GitHub para repositorio, versionamiento y revisión de cambios.
+
+  ¿En qué parte del proyecto se integró?
+    Respuesta: Gestión completa de ramas feature/*, integración en develop y trazabilidad por PR.
+    Archivo(s) de configuración: [N/A o enlace al repositorio]
+
+  ¿Qué problema específico resolvió?
+    Respuesta: Evitó sobreescrituras de código y permitió integración ordenada entre backend y frontend.
+
+  ¿Qué valor agregado aportó al proyecto?
+    Respuesta: Trazabilidad de cambios, revisión colaborativa y control del flujo de integración.
+
+  Evidencia técnica disponible:
+    ☐ Capturas de pantalla (ubicación: _______________)
+    ☐ Archivo de configuración (ruta: _______________)
+    ☐ Logs de ejecución (ubicación: _______________)
+    ☐ Pipeline ejecutado exitosamente
+    ☐ Otra: Historial de commits y Pull Requests en repositorio
+
+HERRAMIENTA 2: Postman (si aplica en validación de API)
+
+  ¿Cuál herramienta se utilizó?
+    Respuesta: [Completar: Postman / No aplica]
+
+  ¿En qué parte del proyecto se integró?
+    Respuesta: Pruebas de endpoints de autenticación y módulos CRUD.
+    Archivo(s) de configuración: [colección .json exportada si existe]
+
+  ¿Qué problema específico resolvió?
+    Respuesta: Verificación rápida de respuestas HTTP y validación de contratos API.
+
+  ¿Qué valor agregado aportó al proyecto?
+    Respuesta: Reducción de errores de integración frontend-backend.
+
+  Evidencia técnica disponible:
+    ☐ Capturas de pantalla (ubicación: _______________)
+    ☐ Archivo de configuración (ruta: _______________)
+    ☐ Logs de ejecución (ubicación: _______________)
+    ☐ Pipeline ejecutado exitosamente
+    ☐ Otra: ___________________________________________
+
+===============================================================
+5. FASE 3 – INTEGRACIÓN CONTINUA Y FLUJO DE TRABAJO
+===============================================================
+
+ESTRATEGIA DE RAMAS UTILIZADA:
+  ┌─────────────────────────────────────────────┐
+  │  main                                       │
+  │   └── develop                               │
+  │         ├── feature/login-usuario           │
+  │         ├── feature/registro-empresa        │
+  │         ├── feature/gestion-tecnicos        │
+  │         ├── feature/orden-servicio          │
+  │         └── feature/atencion-tecnica-ui     │
+  └─────────────────────────────────────────────┘
+
+PULL REQUESTS REALIZADOS:
+  PR #1:
+    Título      : feat: implementa autenticación JWT en backend
+    Rama origen : feature/login-usuario
+    Rama destino: develop
+    Autor       : _______________________________________
+    Revisor     : _______________________________________
+    Estado      : [Merged / Open / Closed]
+    URL         : _______________________________________
+    Descripción : Implementación de login y generación/validación de token.
+
+  PR #2:
+    Título      : feat: módulo de gestión de empresas
+    Rama origen : feature/registro-empresa
+    Rama destino: develop
+    Autor       : _______________________________________
+    Revisor     : _______________________________________
+    Estado      : [Merged / Open / Closed]
+    URL         : _______________________________________
+    Descripción : CRUD de empresas con DTOs y validaciones.
+
+  [REPETIR PARA CADA PR ADICIONAL]
+
+REVISIÓN DE CÓDIGO (CODE REVIEW):
+  ¿Se realizó revisión de código?       : [Sí / No]
+  ¿Quién realizó las revisiones?        : ____________
+  Tipos de comentarios realizados       :
+    ☐ Sugerencias de mejora
+    ☐ Errores detectados y corregidos
+    ☐ Preguntas de claridad
+    ☐ Aprobaciones con comentario
+
+MANEJO DE CONFLICTOS:
+  ¿Ocurrieron conflictos durante el Sprint?: [Sí / No]
+  
+  Si SÍ, describir:
+    Conflicto 1:
+      Archivos en conflicto : _________________________
+      Causa del conflicto   : _________________________
+      Cómo se resolvió      : _________________________
+      Responsable           : _________________________
+
+ESTRATEGIA DE INTEGRACIÓN:
+  Estrategia elegida     : Git Flow
+  Justificación          : Permite trabajo paralelo por historias y reduce riesgo de integración.
+  Frecuencia de merges   : [Diario / por historia / otra]
+
+===============================================================
+6. FASE 4 – SEGUIMIENTO ÁGIL DEL SPRINT
+===============================================================
+
+HERRAMIENTA DE GESTIÓN UTILIZADA: [Jira/Trello/Azure/otra]
+URL del tablero: ___________________________________________
+
+ESTADO DEL TABLERO AL CIERRE DEL SPRINT:
+
+  TO DO (Pendientes):
+    - [Historia/Tarea]
+    - [Historia/Tarea]
+
+  IN PROGRESS (En progreso):
+    - [Historia/Tarea]
+    - [Historia/Tarea]
+
+  DONE (Completadas):
+    - HU-001: Inicio de sesión seguro
+    - HU-002: Gestión de empresas
+    - HU-003: Gestión de técnicos
+    - HU-004: Gestión de órdenes de servicio
+    - HU-005: Atención técnica en frontend
+
+MÉTRICAS DEL SPRINT:
+
+  Story Points planificados      : [X]
+  Story Points completados       : [X]
+  Velocidad del equipo           : [X] SP por Sprint
+  Historias planificadas         : [X]
+  Historias completadas          : [X]
+  Historias incompletas          : [X]
+  Porcentaje de completitud      : [X]%
+
+  Cálculo de velocidad:
+    Velocidad = SP completados / duración del Sprint
+    Velocidad = [X] / [X] semanas = [X] SP/semana
+
+===============================================================
+7. FASE 5 – DOCUMENTACIÓN TÉCNICA
+===============================================================
+
+README DEL PROYECTO:
+  Ubicación     : frontend/README.md (actualmente plantilla base Vite, requiere actualización)
+  URL directa   : _______________________________________
+  Última actualización: [DD/MM/AAAA]
+
+  Secciones incluidas en el README:
+    ☐ Descripción del proyecto
+    ☐ Tecnologías utilizadas
+    ☐ Arquitectura del sistema
+    ☐ Requisitos previos (versiones de herramientas)
+    ☐ Instrucciones de instalación paso a paso
+    ☐ Instrucciones de ejecución
+    ☐ Variables de entorno necesarias (.env.example)
+    ☐ Endpoints de la API (si aplica)
+    ☐ Autores y roles
+
+TECNOLOGÍAS UTILIZADAS EN EL PROYECTO:
+  Backend       : Java 17 + Spring Boot + Spring Security + JPA + JWT
+  Frontend      : React 19 + Vite 7 + React Router DOM 7 + TailwindCSS 4
+  Base de datos : PostgreSQL
+  Control versiones: Git + [GitHub/GitLab]
+  DevOps        : [GitHub y/o Postman, completar según evidencia]
+  Gestión ágil  : [Jira/Trello/otra]
+
+ARQUITECTURA DEL SISTEMA:
+  Tipo de arquitectura: Monolítica por capas (API REST + cliente web)
+  Descripción         : Backend en capas (controller/service/repository/entity/dto/security) y frontend SPA consumiendo API REST.
+  
+  Diagrama (descripción textual si no hay imagen):
+    [Cliente/Frontend React]
+         ↓ HTTP/REST
+    [Backend/API Spring Boot]
+         ↓ JPA
+    [Base de Datos PostgreSQL]
+
+DECISIONES TÉCNICAS TOMADAS EN EL SPRINT:
+  
+  Decisión 1:
+    Qué se decidió : Implementar autenticación con JWT.
+    Por qué        : Evitar sesiones en servidor y habilitar autorización por token.
+    Alternativas   : Sesión tradicional con cookies.
+    Impacto        : Mayor seguridad y escalabilidad en la API.
+
+  Decisión 2:
+    Qué se decidió : Estructurar backend por capas con DTOs.
+    Por qué        : Separar responsabilidades y mejorar mantenibilidad.
+    Alternativas   : Exponer entidades directamente.
+    Impacto        : Mejor legibilidad, validación y control del contrato API.
+
+DEUDA TÉCNICA IDENTIFICADA:
+  - Actualizar README principal con documentación completa del proyecto.
+  - Agregar pruebas automatizadas adicionales para controladores/servicios.
+  Sprint en que se atenderá: Sprint #3
+
+===============================================================
+8. RETROSPECTIVA DEL SPRINT
+===============================================================
+
+Fecha de la retrospectiva: [DD/MM/AAAA]
+Participantes             : [Nombres]
+
+¿SE CUMPLIÓ EL OBJETIVO DEL SPRINT?
+  Respuesta: [Sí / Parcialmente / No]
+  
+  Justificación:
+  _____________________________________________________________
+  _____________________________________________________________
+
+¿QUÉ SALIÓ BIEN?
+  +  Integración funcional entre frontend y backend.
+  +  Módulos principales del dominio implementados.
+  +  Uso de ramas por historia para trabajo paralelo.
+
+¿QUÉ SALIÓ MAL O QUÉ DIFICULTADES HUBO?
+  -  Documentación técnica incompleta en README.
+  -  Posibles retrasos en revisión de Pull Requests.
+  -  Cobertura de pruebas automatizadas limitada.
+
+¿QUÉ MEJORAREMOS PARA EL SPRINT #3?
+  →  Definir checklist de Definition of Done más estricto.
+  →  Incorporar pipeline CI con pruebas automáticas.
+  →  Fortalecer documentación y evidencia por historia.
+
+¿HUBO BLOQUEOS TÉCNICOS?
+  ¿Cuáles?          : [Completar]
+  ¿Cómo se resolvieron?: [Completar]
+
+===============================================================
+9. CHECKLIST FINAL DE ENTREGA
+===============================================================
+
+FASE 1 – HISTORIAS DE USUARIO:
+  ☐ Mínimo 5 historias implementadas y funcionales
+  ☐ Cada historia tiene código fuente funcionando
+  ☐ Cada historia referencia el backlog correctamente
+  ☐ Criterios de aceptación cumplidos y documentados
+  ☐ Ramas con nomenclatura feature/nombre-historia
+  ☐ Integración a develop mediante Pull Request
+  ☐ Commits claros y trazables
+
+FASE 2 – DEVOPS:
+  ☐ Declarada situación (Caso A o Caso B)
+  ☐ Caso A: herramienta explicada con evidencia técnica
+  ☐ Caso B: justificación técnica completa redactada
+
+FASE 3 – INTEGRACIÓN CONTINUA:
+  ☐ Pull Requests documentados correctamente
+  ☐ Code review evidenciado
+  ☐ Flujo de ramas aplicado correctamente
+  ☐ Estrategia de integración explicada
+  ☐ Manejo de conflictos documentado
+
+FASE 4 – SEGUIMIENTO ÁGIL:
+  ☐ Tablero actualizado con todos los estados
+  ☐ Historias en To Do / In Progress / Done
+  ☐ Métricas calculadas (velocidad y % completado)
+  ☐ Retrospectiva realizada y documentada
+
+FASE 5 – DOCUMENTACIÓN:
+  ☐ README actualizado con instrucciones de ejecución
+  ☐ README incluye tecnologías usadas
+  ☐ README incluye arquitectura básica
+  ☐ Documentación adicional en herramienta seleccionada
+  ☐ Decisiones técnicas documentadas
+
+GENERAL:
+  ☐ Repositorio con historial limpio y trazable
+  ☐ Todos los integrantes con commits registrados
+  ☐ Evidencias adjuntas (capturas, logs, configs)
+  ☐ Presentación preparada para sustentación
+
+===============================================================
+FIRMAS DE RESPONSABILIDAD
+===============================================================
+
+Integrante 1: _______________________ Firma: ______________
+Integrante 2: _______________________ Firma: ______________
+Integrante 3: _______________________ Firma: ______________
+Integrante 4: _______________________ Firma: ______________
+
+Fecha de entrega: ___________________
+
+===============================================================
+ANEXO: SYSTEM PROMPT – ASISTENTE DE PROYECTO SPRINT #2
+===============================================================
+
+"Hola equipo 👋 Soy tu asistente para el Sprint #2.
+Estoy aquí para ayudarles a cumplir todas las fases 
+de la rúbrica correctamente.
+
+¿Con qué necesitan ayuda hoy?
+1️⃣ Historias de usuario
+2️⃣ Herramientas DevOps
+3️⃣ Integración continua / Git Flow
+4️⃣ Tablero ágil y métricas
+5️⃣ Documentación técnica
+6️⃣ Revisión general de cumplimiento"
+
+Regla de operación del asistente (uso recomendado en sesiones):
+1. Pregunta inicial obligatoria:
+   "¿En qué fase están trabajando actualmente?"
+2. Formato de respuesta sugerido:
+   📌 ANÁLISIS ACTUAL
+   ✅ QUÉ CUMPLE
+   ❌ QUÉ FALTA
+   📝 PASOS A SEGUIR
+   💡 RECOMENDACIÓN TÉCNICA
+3. Cierre de sesión recomendado por fases:
+   FASE 1: [X/5 historias completadas]
+   FASE 2: [Herramienta: X – Estado: ✅/❌]
+   FASE 3: [PRs abiertos: X | Mergeados: X]
+   FASE 4: [Tablero: ✅/⚠️ | Métricas: calculadas/pendientes]
+   FASE 5: [README: ✅/❌ | Docs extra: ✅/❌]
+
+===============================================================
+FIN DEL DOCUMENTO
+Versión: 1.0 | Sprint #2 | Desarrollo de Software II
+Universidad del Valle – Ingeniería de Sistemas
+===============================================================
