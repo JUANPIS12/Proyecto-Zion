@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51ea31d8-a028-4fea-822c-a27a2e7e32ff" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/APIs/src/main/java/com/service/MantenimientoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/APIs/src/main/java/com/service/MantenimientoService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIs/src/main/java/com/service/OrdenServicioService.java" beforeDir="false" afterPath="$PROJECT_DIR$/APIs/src/main/java/com/service/OrdenServicioService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/src/App.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -17,32 +16,32 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="3CclCbmVhxeBBvzgU0cK1w0hkBJ" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.ZionBackendApplication.executor": "Run",
-    "Maven.zion-backend [clean,install].executor": "Run",
-    "Maven.zion-backend [clean].executor": "Run",
-    "Maven.zion-backend [compile].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/admin-create-tec",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Asus/Desktop/TDSOFT/6.SEMESTRE/ZION/Proyecto-Zion/backend/servicios",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.ZionBackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zion-backend [clean,install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zion-backend [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zion-backend [compile].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/admin-create-tec&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Asus/Desktop/TDSOFT/6.SEMESTRE/ZION/Proyecto-Zion/backend/servicios&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
   }
-}]]></component>
+}</component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="mvn clean install" />
