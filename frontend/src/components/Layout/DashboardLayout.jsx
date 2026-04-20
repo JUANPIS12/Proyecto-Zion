@@ -52,7 +52,7 @@ export default function DashboardLayout() {
       <div className="flex items-center h-28 px-6 mb-4 border-b border-white/5 bg-gunmetal-950/20 backdrop-blur-sm">
         <div className="flex items-center gap-4 w-full">
            <div className="flex-shrink-0">
-              <img src="/logo-completo.png" alt="ZION" className="h-16 w-auto drop-shadow-[0_4px_8px_rgba(197,126,80,0.3)] animate-pulse-slow" />
+              <img src="/logo-solo.png" alt="ZION" className="h-16 w-auto drop-shadow-[0_4px_8px_rgba(197,126,80,0.3)] animate-pulse-slow" />
            </div>
            <div className="flex flex-col">
               <span className="text-2xl font-black tracking-tighter text-white font-display leading-[0.9]">ZION</span>
