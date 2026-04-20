@@ -6,6 +6,7 @@ import {
   Settings, Users, Building2, FileText, LogOut, ShieldCheck, Globe, Cpu, Menu, X
 } from 'lucide-react';
 import OrderDetailModal from '../ui/OrderDetailModal';
+import ActiveWorkPanel from '../ui/ActiveWorkPanel';
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
@@ -119,6 +120,7 @@ export default function DashboardLayout() {
   return (
     <div className="flex h-[100dvh] bg-slate-50 text-slate-900 font-sans selection:bg-copper-500/30 overflow-hidden relative">
       <OrderDetailModal />
+      <ActiveWorkPanel />
 
       {/* Mobile Top Bar */}
       <div className="lg:hidden absolute top-0 left-0 right-0 h-16 bg-gunmetal-950 border-b border-copper-500/20 z-40 flex items-center justify-between px-5 shadow-[0_4px_20px_-5px_rgba(0,0,0,0.5)]">
