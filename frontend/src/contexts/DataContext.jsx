@@ -21,9 +21,34 @@ export const DataProvider = ({ children }) => {
   const [errorData, setErrorData] = useState('');
   const [successData, setSuccessData] = useState('');
 
+  const [detalleOrden, setDetalleOrden] = useState(null);
+  const [cargandoDetalleOrden, setCargandoDetalleOrden] = useState(false);
+  const [mostrarModalDetalleOrden, setMostrarModalDetalleOrden] = useState(false);
+
   const clearMessages = () => {
     setErrorData('');
     setSuccessData('');
+  };
+
+  const verDetalleOrden = useCallback(async (id) => {
+    try {
+      clearMessages();
+      setCargandoDetalleOrden(true);
+      setMostrarModalDetalleOrden(true);
+
+      const data = await apiService.get(`/ordenes/${id}/detalle`);
+      setDetalleOrden(data);
+    } catch (err) {
+      setErrorData(err.message || 'No se pudo cargar el detalle de la orden');
+      setDetalleOrden(null);
+    } finally {
+      setCargandoDetalleOrden(false);
+    }
+  }, []);
+
+  const closeDetalleOrden = () => {
+    setMostrarModalDetalleOrden(false);
+    setDetalleOrden(null);
   };
 
   const loadData = useCallback(async () => {
@@ -57,9 +82,6 @@ export const DataProvider = ({ children }) => {
       setMantenimientos(mantenimientosData);
 
       if (user?.rol === 'ROLE_ADMIN' || user?.rol === 'admin') {
-        // Usa fetch normal para evitar `/api` prefix si es necesario, 
-        // O asumiendo que apiService maneja admin si lo modificamos.
-        // Pero actualmente el fetch en App.jsx usa: fetchJson(`${API_URL.replace('/api', '')}/admin/usuarios`)
         const res = await fetch('http://localhost:8080/admin/usuarios', {
            headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -91,7 +113,9 @@ export const DataProvider = ({ children }) => {
     usuarios, setUsuarios,
     loadingData, errorData, successData,
     setErrorData, setSuccessData,
-    clearMessages, loadData
+    clearMessages, loadData,
+    detalleOrden, cargandoDetalleOrden, mostrarModalDetalleOrden, 
+    verDetalleOrden, closeDetalleOrden
   };
 
   return (

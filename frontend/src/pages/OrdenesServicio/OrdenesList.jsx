@@ -3,9 +3,13 @@ import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import apiService from '../../services/apiService';
 import GenericTableView from '../../components/ui/GenericTableView';
+import { Eye } from 'lucide-react';
 
 export default function OrdenesList() {
-  const { ordenes, empresas, tecnicos, sedes, loadData, setErrorData, setSuccessData } = useData();
+  const { 
+    ordenes, empresas, tecnicos, sedes, loadData, 
+    setErrorData, setSuccessData, verDetalleOrden 
+  } = useData();
   const { user } = useAuth();
   
   const [searchValue, setSearchValue] = useState('');
@@ -80,23 +84,38 @@ export default function OrdenesList() {
   };
 
   const renderAccionOrden = (orden) => {
+    const btnDetalle = (
+      <button
+        onClick={() => verDetalleOrden(orden.id)}
+        className="flex items-center gap-2 rounded-lg bg-copper-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-copper-700 active:scale-95 whitespace-nowrap"
+      >
+        <Eye className="w-3.5 h-3.5" />
+        Detalle
+      </button>
+    );
+
     if (orden.estado === 'FINALIZADA') {
-      return <span className="text-emerald-500 font-bold text-xs uppercase mx-auto px-4"><div className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-2"></div>OK</span>;
+      return btnDetalle;
     }
+
     const siguientesEstados = {
       PROGRAMADA: 'EN_PROCESO',
       EN_PROCESO: 'FINALIZADA',
     };
     const siguiente = siguientesEstados[orden.estado];
-    if (!siguiente) return '-';
-
+    
     return (
-      <button
-        onClick={() => cambiarEstadoOrden(orden.id, siguiente)}
-        className="rounded-lg bg-indigo-500/10 px-3 py-1.5 text-xs font-bold text-indigo-500 transition-all hover:bg-indigo-500 hover:text-white active:scale-95 whitespace-nowrap"
-      >
-        Mover a {siguiente}
-      </button>
+      <div className="flex items-center gap-2">
+        {btnDetalle}
+        {siguiente && (
+          <button
+            onClick={() => cambiarEstadoOrden(orden.id, siguiente)}
+            className="rounded-lg bg-gunmetal-800/10 px-3 py-1.5 text-xs font-bold text-gunmetal-800 border border-gunmetal-800/20 transition-all hover:bg-gunmetal-900 hover:text-white active:scale-95 whitespace-nowrap"
+          >
+            Mover a {siguiente}
+          </button>
+        )}
+      </div>
     );
   };
 
@@ -131,7 +150,7 @@ export default function OrdenesList() {
 
   const renderForm = () => {
     if (!mostrarFormulario) return null;
-    const inputClass = "w-full rounded-2xl border-2 border-slate-200 bg-slate-50 py-3.5 px-4 text-slate-900 outline-none transition-soft focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 font-medium placeholder:text-slate-400";
+    const inputClass = "w-full rounded-2xl border-2 border-slate-200 bg-slate-50 py-3.5 px-4 text-slate-900 outline-none transition-soft focus:border-copper-500 focus:bg-white focus:ring-4 focus:ring-copper-500/10 font-medium placeholder:text-slate-400";
     return (
       <form onSubmit={crearOrden} className="grid grid-cols-1 gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2">
         <input type="datetime-local" value={nuevaOrden.fechaProgramada} onChange={(e) => setNuevaOrden({ ...nuevaOrden, fechaProgramada: e.target.value })} className={inputClass} required />
@@ -140,7 +159,7 @@ export default function OrdenesList() {
         <select value={nuevaOrden.tecnicoId} onChange={(e) => setNuevaOrden({ ...nuevaOrden, tecnicoId: e.target.value })} className={inputClass} required><option value="">Seleccione técnico</option>{tecnicos.map((t) => (<option key={t.id} value={t.id}>{t.nombre}</option>))}</select>
         <select value={nuevaOrden.sedeId} onChange={(e) => setNuevaOrden({ ...nuevaOrden, sedeId: e.target.value })} className={inputClass} required><option value="">Seleccione sede</option>{sedes.map((s) => (<option key={s.id} value={s.id}>{s.nombre}</option>))}</select>
         <div className="md:col-span-2 flex gap-3">
-          <button type="submit" className="rounded-2xl bg-blue-600 px-5 py-4 text-sm font-bold text-white transition hover:bg-blue-500">Guardar</button>
+          <button type="submit" className="rounded-2xl bg-copper-600 px-5 py-4 text-sm font-bold text-white transition hover:bg-copper-700 shadow-sm">Guardar Orden</button>
           <button type="button" onClick={() => setMostrarFormulario(false)} className="rounded-2xl bg-slate-100 px-5 py-4 text-sm font-bold text-slate-600 hover:bg-slate-200">Cancelar</button>
         </div>
       </form>

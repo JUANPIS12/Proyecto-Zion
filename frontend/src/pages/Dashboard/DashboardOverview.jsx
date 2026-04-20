@@ -7,11 +7,11 @@ export default function DashboardOverview() {
   const { user } = useAuth();
   const { 
     ordenes, tecnicos, visitas, mantenimientos, equipos, sedes, usuarios,
-    loadingData, loadData, errorData, successData
+    loadingData, loadData, verDetalleOrden
   } = useData();
 
-  const primaryButtonClass = "rounded-2xl bg-slate-900 px-5 py-4 text-sm font-bold text-white shadow-premium transition-soft hover:bg-slate-800 hover:-translate-y-0.5 active:scale-95";
-  const smallDarkButtonClass = "rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white shadow-premium transition-all hover:bg-slate-800 active:scale-95";
+  const primaryButtonClass = "rounded-2xl bg-gunmetal-950 px-5 py-4 text-sm font-bold text-white shadow-premium transition-soft hover:bg-gunmetal-900 hover:-translate-y-0.5 active:scale-95";
+  const smallDarkButtonClass = "rounded-lg bg-copper-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-copper-700 active:scale-95";
 
   const renderEstadoBadge = (estado) => {
     switch (estado) {
@@ -143,7 +143,12 @@ export default function DashboardOverview() {
                     <td className="py-4 whitespace-nowrap">{renderEstadoBadge(order.estado)}</td>
                     <td className="py-4 whitespace-nowrap max-w-[200px] truncate">{order.tecnico}</td>
                     <td className="py-4 whitespace-nowrap">
-                      <button className={smallDarkButtonClass}>Ver detalle</button>
+                      <button 
+                        onClick={() => verDetalleOrden(order.id)}
+                        className={smallDarkButtonClass}
+                      >
+                        Ver detalle
+                      </button>
                     </td>
                   </tr>
                 ))}
