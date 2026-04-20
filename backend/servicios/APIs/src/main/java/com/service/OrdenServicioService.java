@@ -52,11 +52,6 @@ public class OrdenServicioService {
 
         @Transactional
         public OrdenServicioDTO crear(OrdenServicioCreateDTO req) {
-                String numero = req.numeroOrden().trim();
-
-                if (ordenServicioRepository.existsByNumeroOrden(numero)) {
-                        throw new IllegalArgumentException("Ya existe una orden con numeroOrden: " + numero);
-                }
 
                 Sede sede = sedeRepository.findById(req.sedeId())
                                 .orElseThrow(() -> new IllegalArgumentException("Sede no existe: " + req.sedeId()));
@@ -70,7 +65,7 @@ public class OrdenServicioService {
                                                 "Tecnico no existe: " + req.tecnicoId()));
 
                 OrdenServicio os = new OrdenServicio();
-                os.setNumeroOrden(numero);
+                os.setNumeroOrden("TEMP-" + System.nanoTime()); // Número temporal para el constraint unique
                 os.setFechaCreacion(LocalDateTime.now());
                 os.setFechaProgramada(req.fechaProgramada());
                 os.setEstado(req.estado());
@@ -80,6 +75,8 @@ public class OrdenServicioService {
                 os.setTecnicoAsignado(tecnico);
 
                 OrdenServicio saved = ordenServicioRepository.save(os);
+                saved.setNumeroOrden(String.format("ORD-%05d", saved.getId()));
+                saved = ordenServicioRepository.save(saved);
 
                 return new OrdenServicioDTO(
                                 saved.getId(),
@@ -88,7 +85,10 @@ public class OrdenServicioService {
                                 saved.getFechaProgramada(),
                                 saved.getEstado(),
                                 saved.getSede().getId(),
+                                saved.getSede().getNombre(),
                                 saved.getEmpresa().getId(),
+                                saved.getEmpresa().getNombre(),
+                                saved.getEmpresa().getDireccion(),
                                 saved.getTecnicoAsignado().getId());
         }
 
@@ -102,7 +102,10 @@ public class OrdenServicioService {
                                                 o.getFechaProgramada(),
                                                 o.getEstado(),
                                                 o.getSede().getId(),
+                                                o.getSede().getNombre(),
                                                 o.getEmpresa().getId(),
+                                                o.getEmpresa().getNombre(),
+                                                o.getEmpresa().getDireccion(),
                                                 o.getTecnicoAsignado().getId()))
                                 .toList();
         }
@@ -119,7 +122,10 @@ public class OrdenServicioService {
                                 o.getFechaProgramada(),
                                 o.getEstado(),
                                 o.getSede().getId(),
+                                o.getSede().getNombre(),
                                 o.getEmpresa().getId(),
+                                o.getEmpresa().getNombre(),
+                                o.getEmpresa().getDireccion(),
                                 o.getTecnicoAsignado().getId());
         }
 
@@ -175,7 +181,10 @@ public class OrdenServicioService {
                         saved.getFechaProgramada(),
                         saved.getEstado(),
                         saved.getSede().getId(),
+                        saved.getSede().getNombre(),
                         saved.getEmpresa().getId(),
+                        saved.getEmpresa().getNombre(),
+                        saved.getEmpresa().getDireccion(),
                         saved.getTecnicoAsignado().getId()
                 );
         }
@@ -244,12 +253,12 @@ public class OrdenServicioService {
                         m.getTipoContrato(),
                         m.getNovedades(),
                         m.getEstadoFinal(),
-                        m.getEvidencias(),
+                        m.getEvidencias() != null ? new java.util.ArrayList<>(m.getEvidencias()) : null,
                         m.getDescripcion(),
                         m.getFechaInicio(),
                         m.getFechaFin(),
-                        m.getOrdenServicio().getId(),
-                        m.getEquipo().getId()
+                        m.getOrdenServicio() != null ? m.getOrdenServicio().getId() : null,
+                        m.getEquipo() != null ? m.getEquipo().getId() : null
                 );
         }
 }

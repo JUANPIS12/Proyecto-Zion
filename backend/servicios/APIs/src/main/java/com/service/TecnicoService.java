@@ -62,6 +62,8 @@ public class TecnicoService {
                 return new TecnicoDTO(
                                 saved.getId(),
                                 saved.getNombre(),
+                                saved.getSede() != null ? saved.getSede().getId() : null,
+                                saved.getSede() != null ? saved.getSede().getNombre() : null,
                                 saved.getTecnologias()
                                                 .stream()
                                                 .map(Tecnologia::getNombre)
@@ -121,6 +123,8 @@ public class TecnicoService {
                 return new TecnicoDTO(
                         saved.getId(),
                         saved.getNombre(),
+                        saved.getSede() != null ? saved.getSede().getId() : null,
+                        saved.getSede() != null ? saved.getSede().getNombre() : null,
                         saved.getTecnologias().stream()
                                 .map(Tecnologia::getNombre)
                                 .collect(Collectors.toSet())
@@ -145,6 +149,8 @@ public class TecnicoService {
                                 .map(t -> new TecnicoDTO(
                                                 t.getId(),
                                                 t.getNombre(),
+                                                t.getSede() != null ? t.getSede().getId() : null,
+                                                t.getSede() != null ? t.getSede().getNombre() : null,
                                                 t.getTecnologias().stream()
                                                                 .map(Tecnologia::getNombre)
                                                                 .collect(Collectors.toSet())))
@@ -159,6 +165,8 @@ public class TecnicoService {
                 return new TecnicoDTO(
                                 t.getId(),
                                 t.getNombre(),
+                                t.getSede() != null ? t.getSede().getId() : null,
+                                t.getSede() != null ? t.getSede().getNombre() : null,
                                 t.getTecnologias().stream()
                                                 .map(Tecnologia::getNombre)
                                                 .collect(Collectors.toSet()));
