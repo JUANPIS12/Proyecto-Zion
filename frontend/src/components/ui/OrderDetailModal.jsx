@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, ClipboardList, Clock, MapPin, Wrench, ShieldCheck, Cpu } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
-import { formatearFecha, renderTipoBadge } from '../../utils/helpers';
+import { formatearFecha, renderTipoBadge, MiniMapa } from '../../utils/helpers';
 
 const TarjetaDetalle = ({ titulo, valor, icon: Icon }) => (
   <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:bg-slate-50">
@@ -134,7 +134,7 @@ export default function OrderDetailModal() {
               <section className="space-y-4">
                 <div className="flex items-center gap-2">
                    <MapPin className="w-5 h-5 text-copper-600" />
-                   <h4 className="text-xl font-bold text-slate-900 font-display">Bitácora de Visitas</h4>
+                   <h4 className="text-xl font-bold text-slate-900 font-display">Resumen del Turno Técnico</h4>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    {detalleOrden.visitas?.map((v) => (
@@ -143,21 +143,23 @@ export default function OrderDetailModal() {
                            <span className="font-black text-slate-300 text-2xl font-display">#{v.id}</span>
                            <span className="text-[10px] font-bold text-slate-500 px-2 py-1 bg-slate-100 rounded-lg">{formatearFecha(v.fechaInicio)}</span>
                         </div>
-                        <p className="text-sm text-slate-700 font-medium mb-4 leading-relaxed">{v.observaciones || 'Sin observaciones de campo.'}</p>
-                        <div className="flex gap-2 border-t border-slate-100 pt-4">
-                           <div className="flex-1">
-                              <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Coordenadas Inicio</p>
-                              <code className="text-[10px] font-bold bg-slate-900 text-white px-2 py-1 rounded-lg block truncate">{v.ubicacionInicio}</code>
-                           </div>
-                           <div className="flex-1 text-right">
-                              <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Coordenadas Fin</p>
-                              <code className="text-[10px] font-bold bg-copper-600 text-white px-2 py-1 rounded-lg block truncate">{v.ubicacionFin}</code>
+                        <p className="text-sm text-slate-700 font-medium mb-4 leading-relaxed">{v.observaciones || 'Sin resumen de turno.'}</p>
+                        <div className="flex flex-col gap-4 border-t border-slate-100 pt-4">
+                           <div className="flex gap-4">
+                             <div className="flex-1">
+                                <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Ubicación Inicial</p>
+                                <MiniMapa coordenadas={v.ubicacionInicio} titulo="Inicio" />
+                             </div>
+                             <div className="flex-1 text-right">
+                                <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Ubicación Final</p>
+                                <MiniMapa coordenadas={v.ubicacionFin} titulo="Fin" />
+                             </div>
                            </div>
                         </div>
                      </div>
                    ))}
                    {(!detalleOrden.visitas || detalleOrden.visitas.length === 0) && (
-                     <div className="col-span-full py-10 text-center border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-medium italic">No hay historial de geoposicionamiento.</div>
+                     <div className="col-span-full py-10 text-center border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-medium italic">El técnico no guardó un resumen ni geoposicionamiento para este servicio.</div>
                    )}
                 </div>
               </section>

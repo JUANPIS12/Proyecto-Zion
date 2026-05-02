@@ -12,7 +12,6 @@ import Login from './pages/Auth/Login';
 import DashboardOverview from './pages/Dashboard/DashboardOverview';
 import OrdenesList from './pages/OrdenesServicio/OrdenesList';
 import TecnicosList from './pages/Tecnicos/TecnicosList';
-import VisitasList from './pages/Visitas/VisitasList';
 import MantenimientosList from './pages/Mantenimiento/MantenimientosList';
 import EquiposList from './pages/Equipos/EquiposList';
 import ClientesList from './pages/Clientes/ClientesList';
@@ -20,6 +19,8 @@ import TecnologiasList from './pages/Tecnologias/TecnologiasList';
 import ReportesView from './pages/Reportes/ReportesView';
 import SedesList from './pages/Admin/SedesList';
 import CoordinadoresList from './pages/Admin/CoordinadoresList';
+import TechnicianServices from './pages/Tecnico/Servicios';
+import AtencionWizard from './pages/Tecnico/AtencionWizard';
 
 // Placeholder Pages (Will be split progressively as part of the new architecture)
 const PlaceholderPage = ({ title }) => (
@@ -40,13 +41,16 @@ function AppRoutes() {
         <Route path="/" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route index element={<DashboardOverview />} />
           <Route path="ordenes" element={<OrdenesList />} />
-          <Route path="visitas" element={<VisitasList />} />
           <Route path="mantenimientos" element={<MantenimientosList />} />
           <Route path="equipos" element={<EquiposList />} />
           <Route path="clientes" element={<ClientesList />} />
           <Route path="tecnicos" element={<TecnicosList />} />
           <Route path="tecnologias" element={<TecnologiasList />} />
           <Route path="reportes" element={<ReportesView />} />
+
+          {/* Rutas Técnico */}
+          <Route path="tecnico/servicios" element={<ProtectedRoute allowedRoles={['ROLE_TECNICO', 'ROLE_ADMIN', 'admin']}><TechnicianServices /></ProtectedRoute>} />
+          <Route path="tecnico/servicio/:id" element={<ProtectedRoute allowedRoles={['ROLE_TECNICO', 'ROLE_ADMIN', 'admin']}><AtencionWizard /></ProtectedRoute>} />
           
           {/* Rutas Admin */}
           <Route path="sedes" element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'admin']}><SedesList /></ProtectedRoute>} />

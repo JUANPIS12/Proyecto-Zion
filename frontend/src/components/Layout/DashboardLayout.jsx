@@ -15,7 +15,7 @@ export default function DashboardLayout() {
   const iconMap = {
     'Dashboard': <LayoutDashboard className="w-4 h-4" />,
     'Órdenes de servicio': <ClipboardList className="w-4 h-4" />,
-    'Visitas técnicas': <MapPin className="w-4 h-4" />,
+    'Mis Servicios': <ClipboardList className="w-4 h-4" />,
     'Mantenimientos': <Wrench className="w-4 h-4" />,
     'Equipos': <Cpu className="w-4 h-4" />,
     'Clientes': <Building2 className="w-4 h-4" />,
@@ -30,7 +30,6 @@ export default function DashboardLayout() {
     let items = [
       { name: 'Dashboard', path: '/' },
       { name: 'Órdenes de servicio', path: '/ordenes' },
-      { name: 'Visitas técnicas', path: '/visitas' },
       { name: 'Mantenimientos', path: '/mantenimientos' },
       { name: 'Equipos', path: '/equipos' },
       { name: 'Clientes', path: '/clientes' },
@@ -40,9 +39,13 @@ export default function DashboardLayout() {
     ];
 
     if (user?.rol === 'ROLE_TECNICO') {
-      items = items.filter(item => !['Visitas técnicas', 'Clientes', 'Técnicos', 'Tecnologías'].includes(item.name));
-    } else if (user?.rol === 'ROLE_ADMIN') {
-      items = [...items, { name: 'Sedes', path: '/sedes' }, { name: 'Coordinadores', path: '/coordinadores' }];
+      items = items.filter(item => !['Órdenes de servicio', 'Clientes', 'Técnicos', 'Tecnologías'].includes(item.name));
+      // Add 'Mis Servicios' as the second item
+      items.splice(1, 0, { name: 'Mis Servicios', path: '/tecnico/servicios' });
+    } else if (user?.rol === 'ROLE_ADMIN' || user?.rol === 'ROLE_COORDINADOR') {
+      if (user?.rol === 'ROLE_ADMIN') {
+        items = [...items, { name: 'Sedes', path: '/sedes' }, { name: 'Coordinadores', path: '/coordinadores' }];
+      }
     }
 
     return items;

@@ -173,7 +173,6 @@ export default function App() {
     let defaultMenu = [
       'Dashboard',
       'Órdenes de servicio',
-      'Visitas técnicas',
       'Mantenimientos',
       'Equipos',
       'Clientes',
@@ -183,7 +182,7 @@ export default function App() {
     ];
 
     if (rolUsuario === 'ROLE_TECNICO') {
-      defaultMenu = defaultMenu.filter(item => !['Visitas técnicas', 'Clientes', 'Técnicos', 'Tecnologías'].includes(item));
+      defaultMenu = defaultMenu.filter(item => !['Clientes', 'Técnicos', 'Tecnologías'].includes(item));
     } else if (rolUsuario === 'ROLE_ADMIN') {
       defaultMenu = [...defaultMenu, 'Sedes', 'Coordinadores'];
     }
