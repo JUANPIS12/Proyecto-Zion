@@ -28,7 +28,19 @@ export default function TecnicoDashboard() {
         apiService.get('/ordenes/mis-ordenes').catch(() => []),
       ]);
       setPerfil(perfilData);
-      setMisOrdenes(Array.isArray(ordenesData) ? ordenesData : []);
+      const dataArr = Array.isArray(ordenesData) ? ordenesData : [];
+      const estadoPriority = {
+        'EN_PROCESO': 1,
+        'PROGRAMADA': 2,
+        'FINALIZADA': 3
+      };
+      dataArr.sort((a, b) => {
+        const pA = estadoPriority[a.estado] || 99;
+        const pB = estadoPriority[b.estado] || 99;
+        if (pA !== pB) return pA - pB;
+        return b.id - a.id;
+      });
+      setMisOrdenes(dataArr);
     } catch (err) {
       console.error('Error cargando dashboard técnico:', err);
     } finally {

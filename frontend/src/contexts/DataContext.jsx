@@ -88,7 +88,21 @@ export const DataProvider = ({ children }) => {
         apiService.get('/mantenimientos'),
       ]);
 
-      setOrdenes(ordenesData);
+      // Apply global sorting: EN_PROCESO -> PROGRAMADA -> FINALIZADA, then newest (ID descending) first
+      const estadoPriority = {
+        'EN_PROCESO': 1,
+        'PROGRAMADA': 2,
+        'FINALIZADA': 3
+      };
+
+      const sortedOrdenesData = ordenesData.sort((a, b) => {
+        const pA = estadoPriority[a.estado] || 99;
+        const pB = estadoPriority[b.estado] || 99;
+        if (pA !== pB) return pA - pB;
+        return b.id - a.id;
+      });
+
+      setOrdenes(sortedOrdenesData);
       setTecnicos(tecnicosData);
       setEmpresas(empresasData);
       setEquipos(equiposData);

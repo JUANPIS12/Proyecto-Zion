@@ -21,10 +21,17 @@ export default function TechnicianServices() {
       // El backend usa el JWT del usuario autenticado para filtrar automáticamente
       // solo las órdenes asignadas a ESTE técnico. No se necesita filtrar en el cliente.
       const data = await apiService.get('/ordenes/mis-ordenes');
-      // Ordenar por fecha programada descendente
-      const sorted = (data || []).sort(
-        (a, b) => new Date(b.fechaProgramada) - new Date(a.fechaProgramada)
-      );
+      const estadoPriority = {
+        'EN_PROCESO': 1,
+        'PROGRAMADA': 2,
+        'FINALIZADA': 3
+      };
+      const sorted = (data || []).sort((a, b) => {
+        const pA = estadoPriority[a.estado] || 99;
+        const pB = estadoPriority[b.estado] || 99;
+        if (pA !== pB) return pA - pB;
+        return b.id - a.id;
+      });
       setServices(sorted);
     } catch (err) {
       console.error('Error cargando mis servicios:', err);
