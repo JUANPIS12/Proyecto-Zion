@@ -1,14 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import {
   LayoutDashboard, ClipboardList, MapPin, Wrench, 
-  Settings, Users, Building2, FileText, LogOut, ShieldCheck, Globe, Cpu, Menu, X
+  Settings, Users, Building2, FileText, LogOut, ShieldCheck, Globe, Cpu, Menu, X, RefreshCw
 } from 'lucide-react';
 import OrderDetailModal from '../ui/OrderDetailModal';
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
+  const { loadData, loadingData } = useData();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const iconMap = {
@@ -108,6 +110,15 @@ export default function DashboardLayout() {
           </div>
         </div>
         
+        <button
+          onClick={loadData}
+          disabled={loadingData}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-gunmetal-100/60 transition-soft hover:bg-emerald-500/10 hover:text-emerald-400 hover:shadow-[inset_0_0_20px_rgba(16,185,129,0.1)] group mb-2"
+        >
+          <RefreshCw className={`h-4 w-4 transition-transform ${loadingData ? 'animate-spin' : 'group-hover:rotate-180'}`} />
+          {loadingData ? 'Actualizando...' : 'Refrescar datos'}
+        </button>
+
         <button
           onClick={logout}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold text-gunmetal-100/60 transition-soft hover:bg-rose-500/10 hover:text-rose-400 hover:shadow-[inset_0_0_20px_rgba(244,63,94,0.1)] group"

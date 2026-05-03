@@ -30,6 +30,7 @@ export default function AtencionWizard() {
   // Visita State
   const [ubicacionInicio, setUbicacionInicio] = useState(null);
   const [fechaInicio, setFechaInicio] = useState(null);
+  const [fechaFin, setFechaFin] = useState(null);
 
   // Equipos Intervenidos State
   const [equipments, setEquipments] = useState([]);
@@ -96,14 +97,18 @@ export default function AtencionWizard() {
         setIsReadOnly(true);
         // Cargar datos del historial si existen
         const detail = await apiService.get(`/ordenes/${id}/detalle`);
-        setEquipments(detail.mantenimientos.map(m => ({
-          equipoId: m.equipoId,
-          serial: `ID: ${m.equipoId}`, // En detalle vendría el serial si lo mapeamos
-          descripcion: m.descripcion,
-          fotos: m.evidencias || []
-        })));
+        setEquipments(detail.mantenimientos.map(m => {
+          const realEq = filteredEqs.find(e => e.id === m.equipoId);
+          return {
+            equipoId: m.equipoId,
+            serial: realEq ? realEq.serial : `ID: ${m.equipoId}`,
+            descripcion: m.descripcion,
+            fotos: m.evidencias || []
+          };
+        }));
         setObservaciones(detail.visitas?.[0]?.observaciones || '');
         setFechaInicio(detail.visitas?.[0]?.fechaInicio);
+        setFechaFin(detail.visitas?.[0]?.fechaFin);
         setStep(2); // Ir directamente al resumen o permitir navegar
       }
     } catch (err) {
@@ -421,7 +426,11 @@ export default function AtencionWizard() {
           <p className="text-slate-400 font-black uppercase tracking-[0.2em] text-[10px]">Resumen del Servicio</p>
           <div className="flex justify-between items-center border-b border-slate-200 pb-3">
             <span className="text-slate-500 font-bold text-sm">Hora de inicio:</span> 
-            <span className="font-black text-slate-900">{fechaInicio ? new Date(fechaInicio).toLocaleTimeString() : '--:--'}</span>
+            <span className="font-black text-slate-900">{fechaInicio ? new Date(fechaInicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span>
+          </div>
+          <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+            <span className="text-slate-500 font-bold text-sm">Hora de finalización:</span> 
+            <span className="font-black text-slate-900">{fechaFin ? new Date(fechaFin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (isReadOnly ? '--:--' : 'Pendiente...')}</span>
           </div>
           <div className="flex justify-between items-center border-b border-slate-200 pb-3">
             <span className="text-slate-500 font-bold text-sm">Equipos atendidos:</span> 
@@ -450,7 +459,7 @@ export default function AtencionWizard() {
               onClick={captureLocationAndFinish} 
               loading={submitting}
             >
-              FINALIZAR Y FIRMAR <CheckCircle size={20} className="ml-2" />
+              FINALIZAR SERVICIO <CheckCircle size={20} className="ml-2" />
             </Button>
           ) : (
             <Button variant="primary" onClick={() => navigate('/tecnico/servicios')} className="flex-1 font-black py-4 bg-slate-900">

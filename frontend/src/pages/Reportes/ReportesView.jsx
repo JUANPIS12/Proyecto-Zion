@@ -4,6 +4,13 @@ import apiService from '../../services/apiService';
 import { Badge } from '../../components/UI';
 import { BarChart3, Clock, TrendingUp, Users, Calendar, ArrowRight } from 'lucide-react';
 
+const formatHorasMinutos = (horasDecimal) => {
+  if (!horasDecimal) return '0h 0m';
+  const h = Math.floor(horasDecimal);
+  const m = Math.round((horasDecimal - h) * 60);
+  return `${h}h ${m}m`;
+};
+
 export default function ReportesView() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -63,7 +70,7 @@ export default function ReportesView() {
             </div>
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-500 mb-1">Total Horas (Semanal)</h3>
             <p className="text-5xl font-black text-slate-900 tracking-tighter">
-              {horasData.reduce((acc, curr) => acc + curr.horas, 0).toFixed(1)}
+              {formatHorasMinutos(horasData.reduce((acc, curr) => acc + curr.horas, 0))}
             </p>
           </div>
           <div className="mt-6 flex items-center gap-2 text-emerald-600 font-bold text-xs bg-emerald-50 px-3 py-1.5 rounded-lg w-fit">
@@ -115,8 +122,7 @@ export default function ReportesView() {
                     <span className="text-sm font-black text-slate-900 group-hover:text-copper-600 transition-colors">{item.tecnicoNombre}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-2xl font-black text-slate-900">{item.horas.toFixed(1)}</span>
-                    <span className="text-xs font-bold text-slate-400 ml-1">hrs</span>
+                    <span className="text-2xl font-black text-slate-900">{formatHorasMinutos(item.horas)}</span>
                   </div>
                 </div>
                 <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200 shadow-inner">
@@ -153,7 +159,7 @@ export default function ReportesView() {
                     <div className="font-bold text-slate-900">{item.tecnicoNombre}</div>
                     <div className="text-[10px] text-slate-400 font-bold uppercase">{item.semana}</div>
                   </td>
-                  <td className="px-6 py-4 text-center font-black text-slate-700">{item.horas.toFixed(1)} h</td>
+                  <td className="px-6 py-4 text-center font-black text-slate-700">{formatHorasMinutos(item.horas)}</td>
                   <td className="px-6 py-4 text-center">
                     <Badge variant={item.horas > 30 ? 'success' : item.horas > 15 ? 'warning' : 'pending'}>
                       {item.horas > 30 ? 'ÓPTIMO' : item.horas > 15 ? 'REGULAR' : 'BAJO'}
