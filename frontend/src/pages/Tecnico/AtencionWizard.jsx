@@ -8,6 +8,12 @@ import {
   Settings, Info, Trash2, Plus, MonitorCheck, MapPin, Clock
 } from 'lucide-react';
 
+const getLocalIsoString = () => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 19);
+};
+
 export default function AtencionWizard() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,6 +46,19 @@ export default function AtencionWizard() {
     loadServiceAndData();
   }, [id]);
 
+  useEffect(() => {
+    if (service && service.estado === 'EN_PROCESO' && !isReadOnly) {
+      const draft = {
+        step,
+        equipments,
+        observaciones,
+        fechaInicio,
+        ubicacionInicio
+      };
+      localStorage.setItem(`wizard_draft_${id}`, JSON.stringify(draft));
+    }
+  }, [step, equipments, observaciones, fechaInicio, ubicacionInicio, service, id, isReadOnly]);
+
   const loadServiceAndData = async () => {
     try {
       const serviceData = await apiService.get(`/ordenes/${id}`);
@@ -51,10 +70,26 @@ export default function AtencionWizard() {
       setAvailableEquipments(filteredEqs);
 
       if (serviceData.estado === 'EN_PROCESO') {
-        // Fallback for location/time if already in process but state was lost
-        setUbicacionInicio('Ubicación previa');
-        setFechaInicio(new Date().toISOString().slice(0, 19));
-        setStep(1);
+        const savedDraft = localStorage.getItem(`wizard_draft_${id}`);
+        if (savedDraft) {
+          try {
+            const draft = JSON.parse(savedDraft);
+            setUbicacionInicio(draft.ubicacionInicio || 'Ubicación previa');
+            setFechaInicio(draft.fechaInicio || getLocalIsoString());
+            setStep(draft.step !== undefined ? draft.step : 1);
+            setEquipments(draft.equipments || []);
+            setObservaciones(draft.observaciones || '');
+          } catch (e) {
+            setUbicacionInicio('Ubicación previa');
+            setFechaInicio(getLocalIsoString());
+            setStep(1);
+          }
+        } else {
+          // Fallback for location/time if already in process but state was lost
+          setUbicacionInicio('Ubicación previa');
+          setFechaInicio(getLocalIsoString());
+          setStep(1);
+        }
       }
 
       if (serviceData.estado === 'FINALIZADA') {
@@ -102,10 +137,7 @@ export default function AtencionWizard() {
         console.warn("No se pudo obtener la ubicación", e);
       }
 
-      const now = new Date();
-      // Ajuste de zona horaria para enviar ISO local
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      const nowStr = now.toISOString().slice(0, 19);
+      const nowStr = getLocalIsoString();
 
       setUbicacionInicio(coords);
       setFechaInicio(nowStr);
@@ -177,9 +209,7 @@ export default function AtencionWizard() {
         console.warn("No se pudo obtener la ubicación final", e);
       }
 
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      const fechaFinStr = now.toISOString().slice(0, 19);
+      const fechaFinStr = getLocalIsoString();
 
       const tecnicosData = await apiService.get('/tecnicos');
       const loggedInTech = tecnicosData.find(t => t.username === user?.username);
@@ -216,6 +246,7 @@ export default function AtencionWizard() {
 
       // 3. Finalize Order
       await apiService.patch(`/ordenes/${id}`, { estado: 'FINALIZADA' });
+      localStorage.removeItem(`wizard_draft_${id}`);
       navigate('/tecnico/servicios');
     } catch (err) {
       console.error(err);
