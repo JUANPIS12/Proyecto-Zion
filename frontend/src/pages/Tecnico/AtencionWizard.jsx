@@ -48,7 +48,7 @@ export default function AtencionWizard() {
   }, [id]);
 
   useEffect(() => {
-    if (service && service.estado === 'EN_PROCESO' && !isReadOnly) {
+    if (service && service.estado === 'EN_PROCESO' && !isReadOnly && step > 0) {
       const draft = {
         step,
         equipments,
@@ -77,7 +77,7 @@ export default function AtencionWizard() {
             const draft = JSON.parse(savedDraft);
             setUbicacionInicio(draft.ubicacionInicio || 'Ubicación previa');
             setFechaInicio(draft.fechaInicio || getLocalIsoString());
-            setStep(draft.step !== undefined ? draft.step : 1);
+            setStep(draft.step && draft.step > 0 ? draft.step : 1);
             setEquipments(draft.equipments || []);
             setObservaciones(draft.observaciones || '');
           } catch (e) {
