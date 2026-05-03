@@ -21,6 +21,7 @@ public class Tecnico {
     private String especialidad;
     private String rol;
     private String estado;
+    private String username;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "sede_id", nullable = false)
@@ -59,6 +60,9 @@ public class Tecnico {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
     public Sede getSede() { return sede; }
     public void setSede(Sede sede) { this.sede = sede; }

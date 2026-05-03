@@ -7,5 +7,6 @@ public record TecnicoDTO(
         String nombre,
         Long sedeId,
         String sedeNombre,
-        Set<String> tecnologias
-) {}
+        Set<String> tecnologias,
+        String username
+) {}

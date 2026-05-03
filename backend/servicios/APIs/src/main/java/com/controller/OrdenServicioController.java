@@ -8,6 +8,7 @@ import com.zion.zionbackend.service.OrdenServicioService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -30,6 +31,16 @@ public class OrdenServicioController {
         return ordenServicioService.listar();
     }
 
+    /**
+     * GET /api/ordenes/mis-ordenes
+     * Endpoint seguro: usa el JWT del técnico autenticado para filtrar
+     * y retornar únicamente las órdenes asignadas a ESE técnico.
+     */
+    @GetMapping("/mis-ordenes")
+    public List<OrdenServicioDTO> misOrdenes(Principal principal) {
+        return ordenServicioService.listarPorUsername(principal.getName());
+    }
+
     @GetMapping("/{id}")
     public OrdenServicioDTO obtener(@PathVariable Long id) {
         return ordenServicioService.obtener(id);
@@ -49,4 +60,4 @@ public class OrdenServicioController {
     public void eliminar(@PathVariable Long id) {
         ordenServicioService.eliminar(id);
     }
-}
+}

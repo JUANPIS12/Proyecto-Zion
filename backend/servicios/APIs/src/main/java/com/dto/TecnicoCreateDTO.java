@@ -18,5 +18,10 @@ public record TecnicoCreateDTO(
         Long sedeId,
 
         //aquí llegan las tecnologias
-        Set<Long> tecnologiaIds
+        Set<Long> tecnologiaIds,
+
+        // username del Usuario del sistema vinculado a este técnico
+        String username,
+        String password
 ) {}
+

@@ -18,24 +18,22 @@ export default function TechnicianServices() {
 
   const loadServices = async () => {
     try {
-      const data = await apiService.get('/ordenes'); 
-      const tecnicosData = await apiService.get('/tecnicos');
-      
-      const loggedInTech = tecnicosData.find(t => t.username === user.username);
-      
-      if (loggedInTech) {
-        // Ordenar por fecha programada descendente
-        const myServices = data.filter(o => o.tecnicoId === loggedInTech.id).sort((a, b) => new Date(b.fechaProgramada) - new Date(a.fechaProgramada));
-        setServices(myServices);
-      } else {
-        setServices(data);
-      }
+      // El backend usa el JWT del usuario autenticado para filtrar automáticamente
+      // solo las órdenes asignadas a ESTE técnico. No se necesita filtrar en el cliente.
+      const data = await apiService.get('/ordenes/mis-ordenes');
+      // Ordenar por fecha programada descendente
+      const sorted = (data || []).sort(
+        (a, b) => new Date(b.fechaProgramada) - new Date(a.fechaProgramada)
+      );
+      setServices(sorted);
     } catch (err) {
-      console.error(err);
+      console.error('Error cargando mis servicios:', err);
+      setServices([]);
     } finally {
       setLoading(false);
     }
   };
+
 
   const statusIcons = {
     'PROGRAMADA': <Clock size={16} className="text-indigo-400" />,
@@ -50,90 +48,86 @@ export default function TechnicianServices() {
   if (loading) return <div className="p-8 text-center animate-pulse text-copper-400 font-bold">Cargando servicios...</div>;
 
   return (
-    <div className="p-4 safe-top animate-fade-in max-w-xl mx-auto">
+    <div className="min-h-screen bg-slate-50 p-4 safe-top animate-fade-in max-w-xl mx-auto">
       <header className="mb-6">
-        <h1 className="text-3xl font-black mb-2 text-white">Mis Servicios</h1>
-        <p className="text-slate-400 font-medium">Gestión de rutas y atenciones</p>
+        <h1 className="text-4xl font-black mb-2 text-slate-950 tracking-tighter">Mis Servicios</h1>
+        <p className="text-slate-500 font-medium ml-1">Gestión de rutas y atenciones</p>
       </header>
 
       {/* Tabs UI */}
-      <div className="flex bg-slate-800/80 p-1.5 rounded-xl mb-6 shadow-inner border border-white/5">
-        <button 
-          className={`flex-1 py-2.5 text-sm font-black tracking-wide rounded-lg transition-all duration-300 ${activeTab === 'pendientes' ? 'bg-copper-600 text-white shadow-md scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+      <div className="flex bg-white p-1.5 rounded-2xl mb-8 shadow-premium border border-slate-100">
+        <button
+          className={`flex-1 py-3 text-xs font-black tracking-widest uppercase rounded-xl transition-all duration-300 ${activeTab === 'pendientes' ? 'bg-slate-900 text-white shadow-xl scale-[1.02]' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           onClick={() => setActiveTab('pendientes')}
         >
           Pendientes ({pendientes.length})
         </button>
-        <button 
-          className={`flex-1 py-2.5 text-sm font-black tracking-wide rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'historial' ? 'bg-slate-700 text-white shadow-md scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+        <button
+          className={`flex-1 py-3 text-xs font-black tracking-widest uppercase rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'historial' ? 'bg-copper-600 text-white shadow-xl scale-[1.02]' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           onClick={() => setActiveTab('historial')}
         >
           <History size={16} /> Historial ({finalizados.length})
         </button>
       </div>
 
-      <div className="space-y-4 pb-20">
+      <div className="space-y-6 pb-20">
         {displayedServices.length === 0 ? (
-          <div className="glass-card text-center p-12 border-dashed border-2 border-white/10">
+          <div className="glass-card text-center p-16 border-dashed border-2 border-slate-200 bg-white">
             {activeTab === 'pendientes' ? (
-               <Calendar size={48} className="mx-auto mb-4 text-slate-600" />
+              <Calendar size={48} className="mx-auto mb-4 text-slate-200" />
             ) : (
-               <CheckCircle2 size={48} className="mx-auto mb-4 text-emerald-900" />
+              <CheckCircle2 size={48} className="mx-auto mb-4 text-emerald-100" />
             )}
-            <p className="text-slate-400 font-medium">No hay servicios en esta sección.</p>
+            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No hay servicios en esta sección.</p>
           </div>
         ) : (
           displayedServices.map((service) => (
             <div 
               key={service.id} 
-              className={`glass-card flex flex-col gap-4 border border-white/5 transition-all ${service.estado !== 'FINALIZADA' ? 'active:scale-[0.98] cursor-pointer hover:border-copper-500/50 hover:bg-slate-800/80' : 'opacity-90'}`}
+              className={`glass-card flex flex-col gap-5 border border-slate-100 transition-all active:scale-[0.98] cursor-pointer hover:border-copper-200 hover:shadow-premium-xl bg-white ${service.estado === 'FINALIZADA' ? 'opacity-95' : ''}`}
               onClick={() => {
-                if (service.estado !== 'FINALIZADA') {
-                  navigate(`/tecnico/servicio/${service.id}`);
-                }
+                navigate(`/tecnico/servicio/${service.id}`);
               }}
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-copper-400 font-black mb-1.5 block">
-                    ORDEN #{service.numeroOrden || service.id}
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-copper-600 font-black mb-1.5 block">
+                    ORDEN #{String(service.numeroOrden || service.id).slice(-5)}
                   </span>
-                  <h3 className="text-xl font-bold text-white leading-tight">{service.empresaNombre || 'Cliente Zion'}</h3>
+                  <h3 className="text-xl font-black text-slate-900 leading-tight tracking-tight">{service.empresaNombre || 'Cliente Zion'}</h3>
                 </div>
-                <Badge variant={service.estado === 'PROGRAMADA' ? 'pending' : service.estado === 'EN_PROCESO' ? 'warning' : 'success'}>
-                  <span className="flex items-center gap-1.5 font-bold">
-                    {statusIcons[service.estado]}
-                    {service.estado}
-                  </span>
-                </Badge>
+                <span className={`badge-premium ${service.estado === 'FINALIZADA' ? 'badge-success' : service.estado === 'EN_PROCESO' ? 'badge-warning' : 'badge-pending'}`}>
+                  {statusIcons[service.estado]}
+                  {service.estado}
+                </span>
               </div>
 
-              <div className="space-y-2.5 bg-slate-900/50 p-3 rounded-xl border border-white/5">
-                <div className="flex items-center gap-3 text-sm text-slate-300">
-                  <MapPin size={16} className="text-rose-400 shrink-0" />
-                  <span className="font-medium leading-snug">{service.empresaDireccion || 'Dirección no disponible'}</span>
+              <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="flex items-start gap-3 text-sm text-slate-600">
+                  <MapPin size={16} className="text-rose-500 shrink-0 mt-0.5" />
+                  <span className="font-bold leading-tight">{service.empresaDireccion || 'Dirección no disponible'}</span>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-slate-400">
-                  <div className="w-4 shrink-0" /> {/* Espaciador visual alineado */}
-                  <span className="font-medium">Sede: {service.sedeNombre || 'Planta Principal'}</span>
+                <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                  <div className="w-4 shrink-0" />
+                  <span>Sede: <span className="text-slate-900 font-bold">{service.sedeNombre || 'Planta Principal'}</span></span>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-slate-400">
-                  <Calendar size={16} className="text-indigo-400 shrink-0" />
-                  <span className="font-medium">Programado: {new Date(service.fechaProgramada).toLocaleDateString()}</span>
+                <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                  <Calendar size={16} className="text-indigo-500 shrink-0" />
+                  <span>Programado: <span className="text-slate-900 font-bold">{new Date(service.fechaProgramada).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}</span></span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-white/5 flex justify-between items-center">
+              <div className="pt-2 flex justify-between items-center">
                 {service.estado === 'FINALIZADA' ? (
-                  <div className="flex items-center gap-2 text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-lg w-full justify-center">
+                  <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl w-full justify-center border border-emerald-100">
                     <CheckCircle2 size={16} />
-                    <span className="text-xs font-black uppercase tracking-widest">Servicio Completado</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Ver Historial de Atención</span>
                   </div>
                 ) : (
                   <>
-                    <span className="text-xs text-copper-400 font-black tracking-widest uppercase bg-copper-500/10 px-3 py-1.5 rounded-lg">Ver detalles e Iniciar</span>
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                       <ChevronRight size={18} className="text-copper-400" />
+                    <span className="text-[10px] text-copper-600 font-black tracking-widest uppercase bg-copper-50 px-3 py-2 rounded-xl border border-copper-100">Iniciar atención ahora</span>
+                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-copper-600 group-hover:text-white transition-all">
+                      <ChevronRight size={20} />
                     </div>
                   </>
                 )}
@@ -143,5 +137,6 @@ export default function TechnicianServices() {
         )}
       </div>
     </div>
+
   );
 }

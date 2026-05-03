@@ -4,8 +4,11 @@ import com.zion.zionbackend.dto.TecnicoCreateDTO;
 import com.zion.zionbackend.dto.TecnicoDTO;
 import com.zion.zionbackend.service.TecnicoService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.zion.zionbackend.dto.TecnicoUpdateDTO;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/tecnicos")
@@ -27,6 +30,18 @@ public class TecnicoController {
         return tecnicoService.listar();
     }
 
+    /**
+     * GET /api/tecnicos/mi-perfil
+     * Retorna los datos del técnico correspondiente al usuario autenticado.
+     * Si el usuario no tiene un técnico vinculado, retorna 404.
+     */
+    @GetMapping("/mi-perfil")
+    public ResponseEntity<TecnicoDTO> miPerfil(Principal principal) {
+        TecnicoDTO perfil = tecnicoService.obtenerPorUsername(principal.getName());
+        if (perfil == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(perfil);
+    }
+
     @GetMapping("/{id}")
     public TecnicoDTO obtener(@PathVariable Long id) {
         return tecnicoService.obtener(id);
@@ -41,4 +56,4 @@ public class TecnicoController {
     public void eliminar(@PathVariable Long id) {
         tecnicoService.eliminar(id);
     }
-}
+}

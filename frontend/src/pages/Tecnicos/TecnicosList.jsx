@@ -87,22 +87,20 @@ export default function TecnicosList() {
         email: nuevoTecnico.email || null,
         sedeId: Number(nuevoTecnico.sedeId),
         tecnologiaIds: nuevoTecnico.tecnologiaIds,
+        username: nuevoTecnico.username || null,
+        password: nuevoTecnico.password || null,
+        // El backend crea el Usuario automáticamente con username + password
       };
       await apiService.post('/tecnicos', payload);
-      
-      const userPayload = { username: nuevoTecnico.username, password: nuevoTecnico.password, rol: 'ROLE_TECNICO' };
-      try {
-        await apiService.post((apiService.baseUrl || 'http://localhost:8080') + '/admin/usuarios', userPayload);
-      } catch (err) {
-         console.warn("User already created or not able to link", err);
-      }
-      setSuccessData('Técnico creado correctamente.');
+      setSuccessData('Técnico y usuario creados correctamente.');
       setMostrarFormulario(false);
       loadData();
     } catch (err) {
       setErrorData(err.message || 'No se pudo crear el técnico');
     }
   };
+
+
 
   const actualizarTecnico = async (e) => {
     e.preventDefault();

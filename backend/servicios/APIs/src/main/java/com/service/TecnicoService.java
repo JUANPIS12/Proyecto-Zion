@@ -5,9 +5,12 @@ import com.zion.zionbackend.dto.TecnicoDTO;
 import com.zion.zionbackend.entity.Sede;
 import com.zion.zionbackend.entity.Tecnico;
 import com.zion.zionbackend.entity.Tecnologia;
+import com.zion.zionbackend.entity.Usuario;
 import com.zion.zionbackend.repository.SedeRepository;
 import com.zion.zionbackend.repository.TecnicoRepository;
 import com.zion.zionbackend.repository.TecnologiaRepository;
+import com.zion.zionbackend.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.zion.zionbackend.dto.TecnicoUpdateDTO;
@@ -21,15 +24,21 @@ public class TecnicoService {
         private final TecnicoRepository tecnicoRepository;
         private final TecnologiaRepository tecnologiaRepository;
         private final SedeRepository sedeRepository;
+        private final UsuarioRepository usuarioRepository;
+        private final PasswordEncoder passwordEncoder;
 
         public TecnicoService(
                         TecnicoRepository tecnicoRepository,
                         TecnologiaRepository tecnologiaRepository,
-                        SedeRepository sedeRepository) {
+                        SedeRepository sedeRepository,
+                        UsuarioRepository usuarioRepository,
+                        PasswordEncoder passwordEncoder) {
 
                 this.tecnicoRepository = tecnicoRepository;
                 this.tecnologiaRepository = tecnologiaRepository;
                 this.sedeRepository = sedeRepository;
+                this.usuarioRepository = usuarioRepository;
+                this.passwordEncoder = passwordEncoder;
         }
 
         @Transactional
@@ -57,7 +66,31 @@ public class TecnicoService {
                         tecnico.setTecnologias(tecnologias);
                 }
 
+                // Guarda el username del usuario del sistema vinculado
+                if (req.username() != null) {
+                        tecnico.setUsername(req.username());
+                }
+
                 Tecnico saved = tecnicoRepository.save(tecnico);
+
+                // Crear automáticamente el Usuario en la tabla usuario
+                // si se proporcionó username y contraseña
+                if (req.username() != null && !req.username().isBlank()
+                                && req.password() != null && !req.password().isBlank()) {
+
+                        if (usuarioRepository.existsByUsername(req.username())) {
+                                throw new IllegalArgumentException(
+                                        "Ya existe un usuario con el nombre: " + req.username());
+                        }
+
+                        Usuario nuevoUsuario = new Usuario();
+                        nuevoUsuario.setUsername(req.username());
+                        nuevoUsuario.setPassword(passwordEncoder.encode(req.password()));
+                        nuevoUsuario.setRol("ROLE_TECNICO");
+                        nuevoUsuario.setActivo(true);
+                        nuevoUsuario.setPuedeCrearAdmin(false);
+                        usuarioRepository.save(nuevoUsuario);
+                }
 
                 return new TecnicoDTO(
                                 saved.getId(),
@@ -67,7 +100,8 @@ public class TecnicoService {
                                 saved.getTecnologias()
                                                 .stream()
                                                 .map(Tecnologia::getNombre)
-                                                .collect(Collectors.toSet()));
+                                                .collect(Collectors.toSet()),
+                                saved.getUsername());
         }
 
         @Transactional
@@ -127,7 +161,8 @@ public class TecnicoService {
                         saved.getSede() != null ? saved.getSede().getNombre() : null,
                         saved.getTecnologias().stream()
                                 .map(Tecnologia::getNombre)
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toSet()),
+                        saved.getUsername()
                 );
         }
 
@@ -153,7 +188,8 @@ public class TecnicoService {
                                                 t.getSede() != null ? t.getSede().getNombre() : null,
                                                 t.getTecnologias().stream()
                                                                 .map(Tecnologia::getNombre)
-                                                                .collect(Collectors.toSet())))
+                                                                .collect(Collectors.toSet()),
+                                                t.getUsername()))
                                 .toList();
         }
 
@@ -169,8 +205,27 @@ public class TecnicoService {
                                 t.getSede() != null ? t.getSede().getNombre() : null,
                                 t.getTecnologias().stream()
                                                 .map(Tecnologia::getNombre)
-                                                .collect(Collectors.toSet()));
+                                                .collect(Collectors.toSet()),
+                                t.getUsername());
         }
 
+        /**
+         * Retorna el TecnicoDTO del t\u00e9cnico vinculado al username dado.
+         * Retorna null si no existe ninguno (el controller responde 404).
+         */
+        @Transactional(readOnly = true)
+        public TecnicoDTO obtenerPorUsername(String username) {
+                return tecnicoRepository.findByUsername(username)
+                        .map(t -> new TecnicoDTO(
+                                t.getId(),
+                                t.getNombre(),
+                                t.getSede() != null ? t.getSede().getId() : null,
+                                t.getSede() != null ? t.getSede().getNombre() : null,
+                                t.getTecnologias().stream()
+                                        .map(Tecnologia::getNombre)
+                                        .collect(Collectors.toSet()),
+                                t.getUsername()))
+                        .orElse(null);
+        }
 
-}
+}

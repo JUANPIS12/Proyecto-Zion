@@ -3,31 +3,32 @@ import { useParams, useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { Button, Input, Badge } from '../../components/UI';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  ChevronLeft, Play, Camera, FileText, CheckCircle, 
-  Settings, Info, Trash2, Plus, MonitorCheck, MapPin, Clock 
+import {
+  ChevronLeft, Play, Camera, FileText, CheckCircle,
+  Settings, Info, Trash2, Plus, MonitorCheck, MapPin, Clock
 } from 'lucide-react';
 
 export default function AtencionWizard() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [service, setService] = useState(null);
   const [availableEquipments, setAvailableEquipments] = useState([]);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isReadOnly, setIsReadOnly] = useState(false);
 
   // Visita State
   const [ubicacionInicio, setUbicacionInicio] = useState(null);
   const [fechaInicio, setFechaInicio] = useState(null);
-  
+
   // Equipos Intervenidos State
-  const [equipments, setEquipments] = useState([]); 
+  const [equipments, setEquipments] = useState([]);
   const [isAddingEquipment, setIsAddingEquipment] = useState(false);
-  
+
   const [currentEqId, setCurrentEqId] = useState('');
   const [currentEqDescription, setCurrentEqDescription] = useState('');
   const [currentEqPhotos, setCurrentEqPhotos] = useState([]);
@@ -43,7 +44,7 @@ export default function AtencionWizard() {
     try {
       const serviceData = await apiService.get(`/ordenes/${id}`);
       setService(serviceData);
-      
+
       // Load all equipments and filter by empresaId
       const allEqs = await apiService.get('/equipos');
       const filteredEqs = allEqs.filter(e => e.empresaId === serviceData.empresaId);
@@ -54,6 +55,21 @@ export default function AtencionWizard() {
         setUbicacionInicio('Ubicación previa');
         setFechaInicio(new Date().toISOString().slice(0, 19));
         setStep(1);
+      }
+
+      if (serviceData.estado === 'FINALIZADA') {
+        setIsReadOnly(true);
+        // Cargar datos del historial si existen
+        const detail = await apiService.get(`/ordenes/${id}/detalle`);
+        setEquipments(detail.mantenimientos.map(m => ({
+          equipoId: m.equipoId,
+          serial: `ID: ${m.equipoId}`, // En detalle vendría el serial si lo mapeamos
+          descripcion: m.descripcion,
+          fotos: m.evidencias || []
+        })));
+        setObservaciones(detail.visitas?.[0]?.observaciones || '');
+        setFechaInicio(detail.visitas?.[0]?.fechaInicio);
+        setStep(2); // Ir directamente al resumen o permitir navegar
       }
     } catch (err) {
       console.error(err);
@@ -126,14 +142,14 @@ export default function AtencionWizard() {
       return;
     }
     const eqObj = availableEquipments.find(e => e.id === Number(currentEqId)) || { serial: `ID: ${currentEqId}` };
-    
+
     setEquipments(prev => [...prev, {
       equipoId: Number(currentEqId),
       serial: eqObj.serial,
       descripcion: currentEqDescription,
       fotos: currentEqPhotos
     }]);
-    
+
     // Reset form
     setCurrentEqId('');
     setCurrentEqDescription('');
@@ -221,22 +237,28 @@ export default function AtencionWizard() {
   function renderInfo() {
     return (
       <div className="space-y-6">
-        <div className="glass-card p-6 border-indigo-500/30 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10"><MapPin size={100} /></div>
-          <Badge variant="pending" className="mb-4">PENDIENTE DE INICIO</Badge>
-          <h2 className="text-2xl font-bold mb-4">{service.empresaNombre || 'Cliente Zion'}</h2>
-          <div className="space-y-4 text-slate-400 relative z-10">
-            <div className="flex gap-3"><MapPin size={18} className="text-rose-400" /> {service.sedeNombre}</div>
-            <div className="flex gap-3"><Clock size={18} className="text-indigo-400" /> {new Date(service.fechaProgramada).toLocaleString()}</div>
-            <div className="flex gap-3"><Info size={18} className="text-emerald-400" /> {service.descripcion || 'Sin observaciones previas.'}</div>
+        <div className="glass-card p-6 border-indigo-500/30 relative overflow-hidden bg-white shadow-xl">
+          <div className="absolute top-0 right-0 p-4 opacity-5"><MapPin size={100} /></div>
+          {isReadOnly ? (
+            <Badge variant="success" className="mb-4">SERVICIO FINALIZADO (LECTURA)</Badge>
+          ) : (
+            <Badge variant="pending" className="mb-4">PENDIENTE DE INICIO</Badge>
+          )}
+          <h2 className="text-2xl font-black mb-4 text-slate-900">{service.empresaNombre || 'Cliente Zion'}</h2>
+          <div className="space-y-4 text-slate-600 relative z-10 font-medium">
+            <div className="flex gap-3"><MapPin size={18} className="text-rose-500" /> {service.sedeNombre}</div>
+            <div className="flex gap-3"><Clock size={18} className="text-indigo-500" /> {new Date(service.fechaProgramada).toLocaleString()}</div>
+            <div className="flex gap-3"><Info size={18} className="text-emerald-500" /> {service.descripcion || 'Sin observaciones previas.'}</div>
           </div>
         </div>
         
-        {errorMsg && <div className="p-4 bg-red-500/20 text-red-200 rounded-xl border border-red-500/30 text-sm">{errorMsg}</div>}
+        {errorMsg && <div className="p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-200 text-sm font-bold">{errorMsg}</div>}
 
-        <Button onClick={captureLocationAndStart} loading={submitting} className="w-full py-6 text-lg">
-          ACEPTAR Y CAPTURAR UBICACIÓN <MapPin size={20} className="ml-2" />
-        </Button>
+        {!isReadOnly && (
+          <Button onClick={captureLocationAndStart} loading={submitting} className="w-full py-6 text-lg font-black shadow-glow-copper">
+            ACEPTAR Y CAPTURAR UBICACIÓN <MapPin size={20} className="ml-2" />
+          </Button>
+        )}
       </div>
     );
   }
@@ -246,12 +268,12 @@ export default function AtencionWizard() {
       return (
         <div className="space-y-6 animate-fade-in">
           <h3 className="text-xl font-bold flex items-center gap-2"><Settings size={20} className="text-copper-500" /> Registrar Equipo</h3>
-          
+
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-slate-400 mb-2 block">Seleccionar Equipo (Serial)</label>
-              <select 
-                value={currentEqId} 
+              <select
+                value={currentEqId}
                 onChange={(e) => setCurrentEqId(e.target.value)}
                 className="w-full rounded-2xl border-2 border-slate-700 bg-slate-800 py-3.5 px-4 text-white outline-none transition-soft focus:border-copper-500 focus:bg-slate-900 font-medium"
               >
@@ -262,9 +284,9 @@ export default function AtencionWizard() {
               </select>
             </div>
 
-            <Input 
-              label="Descripción del trabajo realizado" 
-              placeholder="Ej. Cambio de filtros, limpieza general..." 
+            <Input
+              label="Descripción del trabajo realizado"
+              placeholder="Ej. Cambio de filtros, limpieza general..."
               value={currentEqDescription}
               onChange={(e) => setCurrentEqDescription(e.target.value)}
               className="h-32 bg-slate-800 border-slate-700 focus:border-copper-500"
@@ -282,7 +304,7 @@ export default function AtencionWizard() {
                 {currentEqPhotos.map((photo, i) => (
                   <div key={i} className="relative group rounded-xl overflow-hidden glass border-white/10 aspect-square">
                     <img src={photo} alt="evidencia" className="w-full h-full object-cover" />
-                    <button 
+                    <button
                       onClick={() => setCurrentEqPhotos(prev => prev.filter((_, idx) => idx !== i))}
                       className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-md text-white"
                     >
@@ -312,23 +334,27 @@ export default function AtencionWizard() {
         </div>
 
         {equipments.length === 0 ? (
-          <div className="glass-card text-center p-8 border-dashed border-2 border-white/10">
-            <MonitorCheck size={40} className="mx-auto mb-4 text-slate-500" />
-            <p className="text-slate-400 mb-4">No has registrado ningún equipo aún.</p>
+          <div className="glass-card text-center p-8 border-dashed border-2 border-slate-200 bg-slate-50">
+            <MonitorCheck size={40} className="mx-auto mb-4 text-slate-300" />
+            <p className="text-slate-500 font-medium mb-4">No hay equipos registrados en esta intervención.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {equipments.map((eq, idx) => (
-              <div key={idx} className="glass p-4 rounded-xl border border-white/5 relative">
-                <button onClick={() => removeEquipment(idx)} className="absolute top-4 right-4 text-slate-500 hover:text-red-400">
-                  <Trash2 size={18} />
-                </button>
-                <div className="font-bold text-lg text-copper-400 mb-1">Serial: {eq.serial}</div>
-                <p className="text-sm text-slate-300 mb-3">{eq.descripcion}</p>
+              <div key={idx} className="glass-card p-5 border border-slate-100 relative bg-white shadow-md hover:border-copper-200 transition-all">
+                {!isReadOnly && (
+                  <button onClick={() => removeEquipment(idx)} className="absolute top-4 right-4 text-slate-300 hover:text-rose-500 transition-colors">
+                    <Trash2 size={18} />
+                  </button>
+                )}
+                <div className="font-black text-lg text-copper-600 mb-1 tracking-tight">Serial: {eq.serial}</div>
+                <p className="text-sm text-slate-600 mb-4 font-medium leading-relaxed">{eq.descripcion}</p>
                 {eq.fotos.length > 0 && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {eq.fotos.map((f, i) => (
-                      <img key={i} src={f} className="w-10 h-10 rounded-md object-cover border border-white/10" alt="Evidencia" />
+                      <div key={i} className="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                        <img src={f} className="w-full h-full object-cover" alt="Evidencia" />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -337,17 +363,20 @@ export default function AtencionWizard() {
           </div>
         )}
 
-        <Button onClick={() => setIsAddingEquipment(true)} variant="secondary" className="w-full border-dashed border-2 border-slate-600 hover:border-copper-500 hover:text-copper-400">
-          <Plus size={20} className="mr-2" /> ADICIONAR EQUIPO
-        </Button>
+        {!isReadOnly && (
+          <Button onClick={() => setIsAddingEquipment(true)} variant="secondary" className="w-full border-dashed border-2 border-slate-300 hover:border-copper-400 hover:text-copper-600 py-4 font-bold">
+            <Plus size={20} className="mr-2" /> ADICIONAR EQUIPO
+          </Button>
+        )}
         
-        <div className="pt-8 mt-4 border-t border-white/10">
-          <Button 
+        <div className="pt-8 mt-4 border-t border-slate-100 flex gap-4">
+           {isReadOnly && <Button variant="secondary" onClick={() => setStep(step - 1)} className="flex-1">Atrás</Button>}
+           <Button 
             onClick={() => setStep(step + 1)} 
-            className="w-full py-5 text-lg font-bold shadow-[0_0_15px_rgba(79,70,229,0.3)] bg-indigo-600 hover:bg-indigo-500" 
-            disabled={equipments.length === 0}
+            className="flex-1 py-5 text-lg font-black shadow-premium bg-slate-900 hover:bg-slate-800" 
+            disabled={!isReadOnly && equipments.length === 0}
           >
-            YA NO AGREGARÉ MÁS EQUIPOS, CONTINUAR AL RESUMEN FINAL <ChevronLeft className="rotate-180 ml-2" size={24} />
+            {isReadOnly ? 'VER RESUMEN FINAL' : 'CONTINUAR AL RESUMEN FINAL'} <ChevronLeft className="rotate-180 ml-2" size={24} />
           </Button>
         </div>
       </div>
@@ -356,54 +385,64 @@ export default function AtencionWizard() {
 
   function renderFinalReport() {
     return (
-      <div className="space-y-6">
-        <div className="glass p-4 rounded-xl space-y-3 bg-slate-800/50">
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Resumen del Turno</p>
-          <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <span className="text-slate-400">Hora de inicio:</span> 
-            <span className="font-medium">{new Date(fechaInicio).toLocaleTimeString()}</span>
+      <div className="space-y-6 animate-fade-in">
+        <div className="glass-card p-6 space-y-4 bg-slate-50 border-slate-200">
+          <p className="text-slate-400 font-black uppercase tracking-[0.2em] text-[10px]">Resumen del Servicio</p>
+          <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+            <span className="text-slate-500 font-bold text-sm">Hora de inicio:</span> 
+            <span className="font-black text-slate-900">{fechaInicio ? new Date(fechaInicio).toLocaleTimeString() : '--:--'}</span>
           </div>
-          <div className="flex justify-between items-center border-b border-white/5 pb-2">
-            <span className="text-slate-400">Equipos atendidos:</span> 
-            <span className="font-medium text-copper-400">{equipments.length}</span>
+          <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+            <span className="text-slate-500 font-bold text-sm">Equipos atendidos:</span> 
+            <span className="font-black text-copper-600 text-lg">{equipments.length}</span>
           </div>
         </div>
 
-        <Input 
-          label="Resumen General del Turno" 
-          placeholder="Escribe todo lo que realizaste durante el turno en la planta..." 
-          value={observaciones}
-          onChange={(e) => setObservaciones(e.target.value)}
-          className="h-40 bg-slate-800 border-slate-700 focus:border-emerald-500"
-        />
+        <div>
+          <label className="text-sm font-black text-slate-500 uppercase tracking-widest mb-2 block">Resumen Final del Turno</label>
+          <textarea 
+            placeholder="Resumen del trabajo realizado..." 
+            value={observaciones}
+            onChange={(e) => !isReadOnly && setObservaciones(e.target.value)}
+            readOnly={isReadOnly}
+            className={`w-full rounded-2xl border-2 border-slate-200 bg-white p-4 text-slate-900 font-medium outline-none transition-soft min-h-[160px] focus:border-emerald-500 ${isReadOnly ? 'bg-slate-50 cursor-default' : ''}`}
+          />
+        </div>
 
-        {errorMsg && <div className="p-4 bg-red-500/20 text-red-200 rounded-xl border border-red-500/30 text-sm">{errorMsg}</div>}
+        {errorMsg && <div className="p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-200 text-sm font-bold">{errorMsg}</div>}
 
-        <div className="flex gap-4 pt-4">
-          <Button variant="secondary" onClick={() => setStep(step - 1)}>Atrás</Button>
-          <Button 
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 shadow-[0_0_20px_rgba(16,185,129,0.2)]" 
-            onClick={captureLocationAndFinish} 
-            loading={submitting}
-          >
-            FINALIZAR Y CAPTURAR UBICACIÓN <MapPin size={18} className="ml-2" />
-          </Button>
+        <div className="flex gap-4 pt-4 border-t border-slate-100">
+          <Button variant="secondary" onClick={() => setStep(step - 1)} className="font-bold">Atrás</Button>
+          {!isReadOnly ? (
+            <Button 
+              className="flex-1 bg-emerald-600 hover:bg-emerald-500 shadow-glow font-black text-lg py-4" 
+              onClick={captureLocationAndFinish} 
+              loading={submitting}
+            >
+              FINALIZAR Y FIRMAR <CheckCircle size={20} className="ml-2" />
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={() => navigate('/tecnico/servicios')} className="flex-1 font-black py-4 bg-slate-900">
+              CERRAR HISTORIAL
+            </Button>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col">
-      <nav className="p-4 flex items-center gap-4 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-20">
-        <button onClick={() => navigate('/tecnico/servicios')} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+      <nav className="p-4 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <button onClick={() => navigate('/tecnico/servicios')} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors">
           <ChevronLeft size={24} />
         </button>
         <div>
-          <h1 className="font-black text-sm uppercase tracking-tighter text-copper-400">Paso {step + 1} de {steps.length}</h1>
-          <p className="text-xs text-slate-300 font-medium">{steps[step].title}</p>
+          <h1 className="font-black text-sm uppercase tracking-tighter text-copper-600">{isReadOnly ? 'Historial de Servicio' : `Paso ${step + 1} de ${steps.length}`}</h1>
+          <p className="text-xs text-slate-500 font-bold">{steps[step].title}</p>
         </div>
       </nav>
+
 
       <div className="flex-1 p-4 pb-12 overflow-y-auto">
         <div className="max-w-xl mx-auto pt-4">
@@ -412,8 +451,8 @@ export default function AtencionWizard() {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 h-1.5 bg-slate-800">
-        <div 
-          className="h-full bg-gradient-to-r from-copper-500 to-emerald-500 transition-all duration-500" 
+        <div
+          className="h-full bg-gradient-to-r from-copper-500 to-emerald-500 transition-all duration-500"
           style={{ width: `${((step + 1) / steps.length) * 100}%` }}
         />
       </div>

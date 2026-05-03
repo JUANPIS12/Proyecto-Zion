@@ -110,6 +110,39 @@ public class OrdenServicioService {
                                 .toList();
         }
 
+        /**
+         * Retorna solo las órdenes asignadas al técnico autenticado (filtrado por username).
+         * Usado por el endpoint /api/ordenes/mis-ordenes con Spring Security Principal.
+         */
+        @Transactional(readOnly = true)
+        public List<OrdenServicioDTO> listarPorUsername(String username) {
+                // Buscar el técnico cuyo username coincida con el login autenticado
+                Tecnico tecnico = tecnicoRepository.findByUsername(username)
+                                .orElse(null);
+
+                // Si no hay técnico vinculado a este usuario, retornar lista vacía
+                if (tecnico == null) {
+                        return java.util.Collections.emptyList();
+                }
+
+                return ordenServicioRepository.findAll().stream()
+                                .filter(o -> o.getTecnicoAsignado() != null
+                                                && o.getTecnicoAsignado().getId().equals(tecnico.getId()))
+                                .map(o -> new OrdenServicioDTO(
+                                                o.getId(),
+                                                o.getNumeroOrden(),
+                                                o.getFechaCreacion(),
+                                                o.getFechaProgramada(),
+                                                o.getEstado(),
+                                                o.getSede().getId(),
+                                                o.getSede().getNombre(),
+                                                o.getEmpresa().getId(),
+                                                o.getEmpresa().getNombre(),
+                                                o.getEmpresa().getDireccion(),
+                                                o.getTecnicoAsignado().getId()))
+                                .toList();
+        }
+
         @Transactional(readOnly = true)
         public OrdenServicioDTO obtener(Long id) {
                 OrdenServicio o = ordenServicioRepository.findById(id)
