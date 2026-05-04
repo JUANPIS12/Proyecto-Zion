@@ -2,6 +2,7 @@ package com;
 
 import com.zion.zionbackend.entity.Usuario;
 import com.zion.zionbackend.repository.UsuarioRepository;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,6 +15,10 @@ import java.util.Optional;
 public class ZionBackendApplication {
 
     public static void main(String[] args) {
+        // Cargar variables de entorno desde .env si existe
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
+
         SpringApplication.run(ZionBackendApplication.class, args);
     }
 
